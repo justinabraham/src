@@ -1,4 +1,8 @@
-This archive has been tested on a Debian Buster 10.1.0 kernel 4.19.0-6-rt-amd64 #1 SMP PREEMPT RT Debian 4.19.67-2+deb10u1 (2019-09-20) x86_64 GNU/Linux
+## Master PC and OS
+
+This toolchain was tested on a desktop machine with Intel(R) Core(TM) i7-4770 CPU @ 3.40GHz and 8 GB RAM.
+
+The OS is a "headless" or network install of Debian GNU/Linux 10.1.0 (buster) running kernerl 4.19.0-6-rt-amd64 which has the PREEMPT RT patch applied.
 
 cd into where the install scripts sit
 	cd install/
