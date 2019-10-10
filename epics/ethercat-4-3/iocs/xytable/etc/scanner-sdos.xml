@@ -1,0 +1,230 @@
+<scanner>
+<devices>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL7xxx.xml -->
+  <device name="EL7041" vendor="0x00000002" product="0x1b813052" revision="0x00190000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+      <pdo name="ENC Control compact" index="0x00001600">
+        <entry name="Control__Enable latch C" index="0x00007000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Enable latch extern on positive edge" index="0x00007000" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Set counter" index="0x00007000" subindex="0x00000003" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Enable latch extern on negative edge" index="0x00007000" subindex="0x00000004" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Gap5255" index="0x00000000" subindex="0x00000000" bit_length="4" datatype="BOOL" oversample="0" />
+        <entry name="Control__Gap5256" index="0x00000000" subindex="0x00000000" bit_length="8" datatype="BOOL" oversample="0" />
+        <entry name="Set counter value" index="0x00007000" subindex="0x00000011" bit_length="16" datatype="UINT" oversample="0" />
+      </pdo>
+      <pdo name="STM Control" index="0x00001602">
+        <entry name="Control__Enable" index="0x00007010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Reset" index="0x00007010" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Reduce torque" index="0x00007010" subindex="0x00000003" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Control__Gap5259" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Control__Gap5260" index="0x00000000" subindex="0x00000000" bit_length="8" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="STM Velocity" index="0x00001604">
+        <entry name="Velocity" index="0x00007010" subindex="0x00000021" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+      <pdo name="ENC Status compact" index="0x00001a00">
+        <entry name="Status__Latch C valid" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Latch extern valid" index="0x00006000" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Set counter done" index="0x00006000" subindex="0x00000003" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Counter underflow" index="0x00006000" subindex="0x00000004" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Counter overflow" index="0x00006000" subindex="0x00000005" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5242" index="0x00000000" subindex="0x00000000" bit_length="2" datatype="BOOL" oversample="0" />
+        <entry name="Status__Extrapolation stall" index="0x00006000" subindex="0x00000008" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Status of input A" index="0x00006000" subindex="0x00000009" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Status of input B" index="0x00006000" subindex="0x0000000a" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Status of input C" index="0x00006000" subindex="0x0000000b" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5243" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Status of extern latch" index="0x00006000" subindex="0x0000000d" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006000" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5244" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006000" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Counter value" index="0x00006000" subindex="0x00000011" bit_length="16" datatype="UINT" oversample="0" />
+        <entry name="Latch value" index="0x00006000" subindex="0x00000012" bit_length="16" datatype="UINT" oversample="0" />
+      </pdo>
+      <pdo name="STM Status" index="0x00001a03">
+        <entry name="Status__Ready to enable" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Ready" index="0x00006010" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Warning" index="0x00006010" subindex="0x00000003" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Error" index="0x00006010" subindex="0x00000004" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Moving positive" index="0x00006010" subindex="0x00000005" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Moving negative" index="0x00006010" subindex="0x00000006" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Torque reduced" index="0x00006010" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5248" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5249" index="0x00000000" subindex="0x00000000" bit_length="3" datatype="BOOL" oversample="0" />
+        <entry name="Status__Digital input 1" index="0x00006010" subindex="0x0000000c" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Digital input 2" index="0x00006010" subindex="0x0000000d" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006010" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5250" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006010" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EKxxxx.xml -->
+  <device name="EK1100" vendor="0x00000002" product="0x044c2c52" revision="0x00120000">
+  </device>
+</devices>
+<chain>
+<device type_name="EK1100" revision="0x00120000" position="0" name="COUPLER.0" />
+<device type_name="EL7041" revision="0x00190000" position="1" name="DRIVE.0" />
+<device type_name="EL7041" revision="0x00190000" position="2" name="DRIVE.1" />
+</chain>
+<sdorequests>
+  ######################### DRIVE.0 START #########################
+  <sdo name="SDO.DRIVE.0.0X6010" slave="DRIVE.0" index="0x6010" >
+    <sdoentry description="Info data 1" subindex="0x11" bit_length="16" datatype="UINT" asynparameter="InfoData1" />
+	<sdoentry description="Info data 2" subindex="0x12" bit_length="16" datatype="UINT" asynparameter="InfoData2" />
+  </sdo>
+  <sdo name="SDO.DRIVE.0.0X8010" slave="DRIVE.0" index="0x8010" >
+    <sdoentry description="Maximal Current" subindex="0x01" bit_length="16" datatype="UINT" asynparameter="MaximalCurrent" />
+    <sdoentry description="Reduced Current" subindex="0x02" bit_length="16" datatype="UINT" asynparameter="ReducedCurrent" />
+	<sdoentry description="Nominal Voltage" subindex="0x03" bit_length="16" datatype="UINT" asynparameter="NominalVoltage" />
+	<sdoentry description="Motor Coil Resistance" subindex="0x04" bit_length="16" datatype="UINT" asynparameter="MotorCoilResistance" />
+	<sdoentry description="Motor EMF" subindex="0x05" bit_length="16" datatype="UINT" asynparameter="MotorEMF" />
+	<sdoentry description="Motor Fullsteps" subindex="0x06" bit_length="16" datatype="UINT" asynparameter="MotorFullsteps" />
+	# only for 7041
+	<sdoentry description="Encoder Increments (4-fold)" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="EncoderIncrements4-fold" />
+	<sdoentry description="Start Velocity" subindex="0x09" bit_length="16" datatype="UINT" asynparameter="StartVelocity" />
+	<sdoentry description="Drive On Delay Time" subindex="0x10" bit_length="16" datatype="UINT" asynparameter="DriveOnDelayTime" />
+	<sdoentry description="Drive Off Delay Time" subindex="0x11" bit_length="16" datatype="UINT" asynparameter="DriveOffDelayTime" />
+  </sdo>
+  <sdo name="SDO.DRIVE.0.0X8011" slave="DRIVE.0" index="0x8011" >
+    <sdoentry description="Kp factor (curr.)" subindex="0x01" bit_length="16" datatype="UINT" asynparameter="KpFactor_Curr" />
+	<sdoentry description="Ki factor (curr.)" subindex="0x02" bit_length="16" datatype="UINT" asynparameter="KiFactor_Curr" />
+	<sdoentry description="Inner window (curr.)" subindex="0x03" bit_length="8" datatype="UINT" asynparameter="InnerWindow_Curr" />
+	<sdoentry description="Outer window (curr.)" subindex="0x05" bit_length="8" datatype="UINT" asynparameter="OuterWindow_Curr" />
+	<sdoentry description="Filter cut off frequency (curr.)" subindex="0x06" bit_length="16" datatype="UINT" asynparameter="FilterCutOffFrequency_Curr" />
+	<sdoentry description="Ka factor (curr.)" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="KaFactor_Curr" />
+	# only for 7041
+	<sdoentry description="Kd factor (curr.)" subindex="0x08" bit_length="16" datatype="UINT" asynparameter="KdFactor_Curr" />
+  </sdo>
+  <sdo name="SDO.DRIVE.0.0X8012" slave="DRIVE.0" index="0x8012" >
+    <sdoentry description="Operation mode" subindex="0x01" bit_length="8" datatype="UINT" asynparameter="OperationMode" />
+	<sdoentry description="Speed range" subindex="0x05" bit_length="8" datatype="UINT" asynparameter="SpeedRange" />
+	# only for 7041
+	<sdoentry description="Feedback type" subindex="0x08" bit_length="1" datatype="UINT" asynparameter="FeedbackType" />
+	<sdoentry description="Invert motor polarity" subindex="0x09" bit_length="8" datatype="USINT" asynparameter="InvertMotorPolarity" />
+	<sdoentry description="Select info data 1" subindex="0x11" bit_length="8" datatype="UINT" asynparameter="SelectInfoData1" />
+	<sdoentry description="Select info data 2" subindex="0x19" bit_length="8" datatype="UINT" asynparameter="SelectInfoData2" />
+	<sdoentry description="Invert digital input 1" subindex="0x30" bit_length="8" datatype="USINT" asynparameter="InvertDigitalInput1" />
+	<sdoentry description="Invert digital input 2" subindex="0x31" bit_length="8" datatype="USINT" asynparameter="InvertDigitalInput2" />
+	<sdoentry description="Function for input 1" subindex="0x32" bit_length="8" datatype="USINT" asynparameter="FunctionInput1" />
+	<sdoentry description="Function for input 2" subindex="0x36" bit_length="8" datatype="USINT" asynparameter="FunctionInput2" />
+  </sdo>
+  <sdo name="SDO.DRIVE.0.0X8013" slave="DRIVE.0" index="0x8013" >
+    <sdoentry description="Kp factor (velo.)" subindex="0x01" bit_length="16" datatype="UINT" asynparameter="KpFactor_Velo" />
+	<sdoentry description="Ki factor (velo.)" subindex="0x02" bit_length="16" datatype="UINT" asynparameter="KiFactor_Velo" />
+	<sdoentry description="Inner window (velo.)" subindex="0x03" bit_length="8" datatype="UINT" asynparameter="InnerWindow_Velo" />
+	<sdoentry description="Outer window (velo.)" subindex="0x05" bit_length="8" datatype="UINT" asynparameter="OuterWindow_Velo" />
+	<sdoentry description="Filter cut off frequency (velo.)" subindex="0x06" bit_length="16" datatype="UINT" asynparameter="FilterCutOffFrequency_Velo" />
+	<sdoentry description="Ka factor (velo./pos.)" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="KaFactor_VeloOrPos" />
+	# only for 7041
+	<sdoentry description="Kd factor (velo./pos.)" subindex="0x08" bit_length="16" datatype="UINT" asynparameter="KdFactor_VeloOrPos" />
+  </sdo>
+  <sdo name="SDO.DRIVE.0.0X8020" slave="DRIVE.0" index="0x8020" >
+    <sdoentry description="Velocity min." subindex="0x01" bit_length="16" datatype="INT" asynparameter="VelocityMin" />
+	<sdoentry description="Velocity max." subindex="0x02" bit_length="16" datatype="INT" asynparameter="VelocityMax" />
+	<sdoentry description="Acceleration pos." subindex="0x03" bit_length="16" datatype="UINT" asynparameter="AccelerationPos" />
+	<sdoentry description="Acceleration neg." subindex="0x04" bit_length="16" datatype="UINT" asynparameter="AccelerationNeg" />
+	<sdoentry description="Deceleration pos." subindex="0x05" bit_length="16" datatype="UINT" asynparameter="DecelerationPos" />
+	<sdoentry description="Deceleration neg." subindex="0x06" bit_length="16" datatype="UINT" asynparameter="DecelerationNeg" />
+	<sdoentry description="Emergency deceleration" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="EmergencyDeceleration" />
+	<sdoentry description="Calibration position" subindex="0x08" bit_length="32" datatype="UINT" asynparameter="CalibrationPosition" />
+	<sdoentry description="Calibration velocity (towards plc cam)" subindex="0x09" bit_length="16" datatype="INT" asynparameter="CalibrationVelocityToPLCCam" />
+	<sdoentry description="Calibration Velocity (off plc cam)" subindex="0x0A" bit_length="16" datatype="INT" asynparameter="CalibrationVelocityOffPLCCam" />
+	<sdoentry description="Target window" subindex="0x0B" bit_length="16" datatype="UINT" asynparameter="TargetWindow" />
+	<sdoentry description="In-Target timeout" subindex="0x0C" bit_length="16" datatype="UINT" asynparameter="InTargetTimeout" />
+	<sdoentry description="Dead time compensation" subindex="0x0D" bit_length="16" datatype="INT" asynparameter="DeadTimeCompensation" />
+	<sdoentry description="Modulo factor" subindex="0x0E" bit_length="32" datatype="UINT" asynparameter="ModuloFactor" />
+	<sdoentry description="Modulo tolerance window" subindex="0x0F" bit_length="32" datatype="UINT" asynparameter="ModuloToleranceWindow" />
+	# only for 7041
+	<sdoentry description="Position lag max." subindex="0x10" bit_length="32" datatype="UINT" asynparameter="PositionLagMax" />
+  </sdo>
+  <sdo name="SDO.DRIVE.0.0X9010" slave="DRIVE.0" index="0x9010" >
+    <sdoentry description="Motor coil current A" subindex="0x04" bit_length="16" datatype="INT" asynparameter="MotorCoilCurrentA" />
+	<sdoentry description="Motor coil current B" subindex="0x05" bit_length="16" datatype="INT" asynparameter="MotorCoilCurrentB" />
+  </sdo>
+  ######################### DRIVE.0 END #########################
+  ######################### DRIVE.1 START #########################
+  <sdo name="SDO.DRIVE.1.0X6010" slave="DRIVE.1" index="0x6010" >
+    <sdoentry description="Info data 1" subindex="0x11" bit_length="16" datatype="UINT" asynparameter="InfoData1" />
+	<sdoentry description="Info data 2" subindex="0x12" bit_length="16" datatype="UINT" asynparameter="InfoData2" />
+  </sdo>
+  <sdo name="SDO.DRIVE.1.0X8010" slave="DRIVE.1" index="0x8010" >
+    <sdoentry description="Maximal Current" subindex="0x01" bit_length="16" datatype="UINT" asynparameter="MaximalCurrent" />
+    <sdoentry description="Reduced Current" subindex="0x02" bit_length="16" datatype="UINT" asynparameter="ReducedCurrent" />
+	<sdoentry description="Nominal Voltage" subindex="0x03" bit_length="16" datatype="UINT" asynparameter="NominalVoltage" />
+	<sdoentry description="Motor Coil Resistance" subindex="0x04" bit_length="16" datatype="UINT" asynparameter="MotorCoilResistance" />
+	<sdoentry description="Motor EMF" subindex="0x05" bit_length="16" datatype="UINT" asynparameter="MotorEMF" />
+	<sdoentry description="Motor Fullsteps" subindex="0x06" bit_length="16" datatype="UINT" asynparameter="MotorFullsteps" />
+	# only for 7041
+	<sdoentry description="Encoder Increments (4-fold)" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="EncoderIncrements4-fold" />
+	<sdoentry description="Start Velocity" subindex="0x09" bit_length="16" datatype="UINT" asynparameter="StartVelocity" />
+	<sdoentry description="Drive On Delay Time" subindex="0x10" bit_length="16" datatype="UINT" asynparameter="DriveOnDelayTime" />
+	<sdoentry description="Drive Off Delay Time" subindex="0x11" bit_length="16" datatype="UINT" asynparameter="DriveOffDelayTime" />
+  </sdo>
+  <sdo name="SDO.DRIVE.1.0X8011" slave="DRIVE.1" index="0x8011" >
+    <sdoentry description="Kp factor (curr.)" subindex="0x01" bit_length="16" datatype="UINT" asynparameter="KpFactor_Curr" />
+	<sdoentry description="Ki factor (curr.)" subindex="0x02" bit_length="16" datatype="UINT" asynparameter="KiFactor_Curr" />
+	<sdoentry description="Inner window (curr.)" subindex="0x03" bit_length="8" datatype="UINT" asynparameter="InnerWindow_Curr" />
+	<sdoentry description="Outer window (curr.)" subindex="0x05" bit_length="8" datatype="UINT" asynparameter="OuterWindow_Curr" />
+	<sdoentry description="Filter cut off frequency (curr.)" subindex="0x06" bit_length="16" datatype="UINT" asynparameter="FilterCutOffFrequency_Curr" />
+	<sdoentry description="Ka factor (curr.)" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="KaFactor_Curr" />
+	# only for 7041
+	<sdoentry description="Kd factor (curr.)" subindex="0x08" bit_length="16" datatype="UINT" asynparameter="KdFactor_Curr" />
+  </sdo>
+  <sdo name="SDO.DRIVE.1.0X8012" slave="DRIVE.1" index="0x8012" >
+    <sdoentry description="Operation mode" subindex="0x01" bit_length="8" datatype="UINT" asynparameter="OperationMode" />
+	<sdoentry description="Speed range" subindex="0x05" bit_length="8" datatype="UINT" asynparameter="SpeedRange" />
+	# only for 7041
+	<sdoentry description="Feedback type" subindex="0x08" bit_length="1" datatype="UINT" asynparameter="FeedbackType" />
+	<sdoentry description="Invert motor polarity" subindex="0x09" bit_length="8" datatype="USINT" asynparameter="InvertMotorPolarity" />
+	<sdoentry description="Select info data 1" subindex="0x11" bit_length="8" datatype="UINT" asynparameter="SelectInfoData1" />
+	<sdoentry description="Select info data 2" subindex="0x19" bit_length="8" datatype="UINT" asynparameter="SelectInfoData2" />
+	<sdoentry description="Invert digital input 1" subindex="0x30" bit_length="8" datatype="USINT" asynparameter="InvertDigitalInput1" />
+	<sdoentry description="Invert digital input 2" subindex="0x31" bit_length="8" datatype="USINT" asynparameter="InvertDigitalInput2" />
+	<sdoentry description="Function for input 1" subindex="0x32" bit_length="8" datatype="USINT" asynparameter="FunctionInput1" />
+	<sdoentry description="Function for input 2" subindex="0x36" bit_length="8" datatype="USINT" asynparameter="FunctionInput2" />
+  </sdo>
+  <sdo name="SDO.DRIVE.1.0X8013" slave="DRIVE.1" index="0x8013" >
+    <sdoentry description="Kp factor (velo.)" subindex="0x01" bit_length="16" datatype="UINT" asynparameter="KpFactor_Velo" />
+	<sdoentry description="Ki factor (velo.)" subindex="0x02" bit_length="16" datatype="UINT" asynparameter="KiFactor_Velo" />
+	<sdoentry description="Inner window (velo.)" subindex="0x03" bit_length="8" datatype="UINT" asynparameter="InnerWindow_Velo" />
+	<sdoentry description="Outer window (velo.)" subindex="0x05" bit_length="8" datatype="UINT" asynparameter="OuterWindow_Velo" />
+	<sdoentry description="Filter cut off frequency (velo.)" subindex="0x06" bit_length="16" datatype="UINT" asynparameter="FilterCutOffFrequency_Velo" />
+	<sdoentry description="Ka factor (velo./pos.)" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="KaFactor_VeloOrPos" />
+	# only for 7041
+	<sdoentry description="Kd factor (velo./pos.)" subindex="0x08" bit_length="16" datatype="UINT" asynparameter="KdFactor_VeloOrPos" />
+  </sdo>
+  <sdo name="SDO.DRIVE.1.0X8020" slave="DRIVE.1" index="0x8020" >
+    <sdoentry description="Velocity min." subindex="0x01" bit_length="16" datatype="INT" asynparameter="VelocityMin" />
+	<sdoentry description="Velocity max." subindex="0x02" bit_length="16" datatype="INT" asynparameter="VelocityMax" />
+	<sdoentry description="Acceleration pos." subindex="0x03" bit_length="16" datatype="UINT" asynparameter="AccelerationPos" />
+	<sdoentry description="Acceleration neg." subindex="0x04" bit_length="16" datatype="UINT" asynparameter="AccelerationNeg" />
+	<sdoentry description="Deceleration pos." subindex="0x05" bit_length="16" datatype="UINT" asynparameter="DecelerationPos" />
+	<sdoentry description="Deceleration neg." subindex="0x06" bit_length="16" datatype="UINT" asynparameter="DecelerationNeg" />
+	<sdoentry description="Emergency deceleration" subindex="0x07" bit_length="16" datatype="UINT" asynparameter="EmergencyDeceleration" />
+	<sdoentry description="Calibration position" subindex="0x08" bit_length="32" datatype="UINT" asynparameter="CalibrationPosition" />
+	<sdoentry description="Calibration velocity (towards plc cam)" subindex="0x09" bit_length="16" datatype="INT" asynparameter="CalibrationVelocityToPLCCam" />
+	<sdoentry description="Calibration Velocity (off plc cam)" subindex="0x0A" bit_length="16" datatype="INT" asynparameter="CalibrationVelocityOffPLCCam" />
+	<sdoentry description="Target window" subindex="0x0B" bit_length="16" datatype="UINT" asynparameter="TargetWindow" />
+	<sdoentry description="In-Target timeout" subindex="0x0C" bit_length="16" datatype="UINT" asynparameter="InTargetTimeout" />
+	<sdoentry description="Dead time compensation" subindex="0x0D" bit_length="16" datatype="INT" asynparameter="DeadTimeCompensation" />
+	<sdoentry description="Modulo factor" subindex="0x0E" bit_length="32" datatype="UINT" asynparameter="ModuloFactor" />
+	<sdoentry description="Modulo tolerance window" subindex="0x0F" bit_length="32" datatype="UINT" asynparameter="ModuloToleranceWindow" />
+	# only for 7041
+	<sdoentry description="Position lag max." subindex="0x10" bit_length="32" datatype="UINT" asynparameter="PositionLagMax" />
+  </sdo>
+  <sdo name="SDO.DRIVE.1.0X9010" slave="DRIVE.1" index="0x9010" >
+    <sdoentry description="Motor coil current A" subindex="0x04" bit_length="16" datatype="INT" asynparameter="MotorCoilCurrentA" />
+	<sdoentry description="Motor coil current B" subindex="0x05" bit_length="16" datatype="INT" asynparameter="MotorCoilCurrentB" />
+  </sdo>
+  ######################### DRIVE.1 END #########################
+</sdorequests>
+</scanner>
+

@@ -1,0 +1,1 @@
+sudo tmux new -s IOC -d ./st.cmd

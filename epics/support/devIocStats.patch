@@ -1,0 +1,27 @@
+diff -Naur --exclude=.svn /home/oxygen/MOONEY/distrib/synApps_5_8/support/devIocStats-3-1-13/configure/RELEASE devIocStats-3-1-13/configure/RELEASE
+--- /home/oxygen/MOONEY/distrib/synApps_5_8/support/devIocStats-3-1-13/configure/RELEASE	2015-03-13 15:47:18.588646000 -0500
++++ devIocStats-3-1-13/configure/RELEASE	2015-03-13 12:44:14.226874000 -0500
+@@ -21,18 +21,20 @@
+ # =============================================================
+ EPICS_MODULES=$(MODULES_SITE_TOP)
+ 
+-MAKE_TEST_IOC_APP=YES
++#MAKE_TEST_IOC_APP=YES
++MAKE_TEST_IOC_APP=NO
+ ifeq '$(MAKE_TEST_IOC_APP)' 'YES'
+ # =============================================================
+ # Define the version of modules needed by
+ # IOC apps or other Support apps - used by testIocStatsApp
+ # =============================================================
+-#SNCSEQ_MODULE_VERSION=seq-R2-0-11-lcls5
++#SNCSEQ_MODULE_VERSION=seq-2-2
+ 
+ # ============================================================
+ # External Support - used by testIocStatsApp
+ # ============================================================
+-#SNCSEQ=$(EPICS_MODULES)/seq/$(SNCSEQ_MODULE_VERSION)
++SUPPORT=/home/oxygen/MOONEY/epics/synAppsSVN/support
++SNCSEQ=$(SUPPORT)/seq-2-2-1
+ endif
+ 
+ # =================================================================

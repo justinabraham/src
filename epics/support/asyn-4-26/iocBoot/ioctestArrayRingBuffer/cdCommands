@@ -1,0 +1,9 @@
+startup = "/home/justin/epicsdev/support/asyn-4-26/iocBoot/ioctestArrayRingBuffer"
+putenv("ARCH=linux-x86_64")
+putenv("IOC=ioctestArrayRingBuffer")
+top = "/home/justin/epicsdev/support/asyn-4-26"
+putenv("TOP=/home/justin/epicsdev/support/asyn-4-26")
+topbin = "/home/justin/epicsdev/support/asyn-4-26/bin/linux-x86_64"
+epics_base = "/epics/base"
+putenv("EPICS_BASE=/epics/base")
+epics_basebin = "/epics/base/bin/linux-x86_64"

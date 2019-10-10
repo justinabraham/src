@@ -1,0 +1,339 @@
+
+program snlStepperMotorSequencer
+%{#include <time.h>}%
+%{#include <string.h>}%
+%{#include <math.h>}%
+%{#include<stdio.h>}%
+%{#include<stdlib.h>}%
+
+// EL7031 Stepper Motor Template Variables
+///////////////////////////////////////////
+double setCounterValue;
+assign setCounterValue to "{MotorDrive}:ENCCONTROLCOMPACT:SETCOUNTERVALUE";
+monitor setCounterValue;
+
+double setCounterControl;
+assign setCounterControl to "{MotorDrive}:ENCCONTROLCOMPACT:CONTROL__SETCOUNTER";
+monitor setCounterControl;
+
+double driveVelocity;
+assign driveVelocity to "{MotorDrive}:STMVELOCITY:VELOCITY";
+monitor driveVelocity;
+
+// IOC variables
+//////////////////////////////////////////
+double snlState;
+assign snlState to "{device}:snlState";
+monitor snlState;
+
+double encCalc;
+assign encCalc to "{device}:encCalc";
+monitor encCalc;
+
+double encCalc_ENG;
+assign encCalc_ENG to "{device}:encCalc_ENG";
+monitor encCalc_ENG;
+
+double potChVal;
+assign potChVal to "{device}:potChVal";
+monitor potChVal;
+
+double potChVal_ENG;
+assign potChVal_ENG to "{device}:potChVal_ENG";
+monitor potChVal_ENG;
+
+double internalCounterVal;
+assign internalCounterVal to "{device}:internalCounterVal";
+monitor internalCounterVal;
+
+double internalCounterVal_ENG;
+assign internalCounterVal_ENG to "{device}:internalCounterVal_ENG";
+monitor internalCounterVal_ENG;
+
+double OUFlowCount;
+assign OUFlowCount to "{device}:OUFlowCount";
+monitor OUFlowCount;
+
+double snlCLFeedback;
+assign snlCLFeedback to "{device}:snlCLFeedback";
+monitor snlCLFeedback;
+
+double dist_Encoder;
+assign dist_Encoder to "{device}:dist_Encoder";
+monitor dist_Encoder;
+
+double dist_Counter;
+assign dist_Counter to "{device}:dist_Counter";
+monitor dist_Counter;
+
+double dist_Pot;
+assign dist_Pot to "{device}:dist_Pot";
+monitor dist_Pot;
+
+double snlHomeMethod;
+assign snlHomeMethod to "{device}:snlHomeMethod";
+monitor snlHomeMethod;
+
+double CL_enable;
+assign CL_enable to "{device}:CL_enable";
+
+double jog_enable;
+assign jog_enable to "{device}:jog_enable";
+
+double fanout_snlState_val;
+assign fanout_snlState_val to "{device}:fanout_snlState_val";
+
+double fanout_snlCLFeedback_val;
+assign fanout_snlCLFeedback_val to "{device}:fanout_snlCLFeedback_val";
+
+double CL_setpoint_dist;
+assign CL_setpoint_dist to "{device}:CL_setpoint_dist";
+
+string CL_FBSensor;
+assign CL_FBSensor to "{device}:CL_FBSensor";
+
+string CL_FSSensor;
+assign CL_FSSensor to "{device}:CL_FSSensor";
+
+double FSErrorLim_val;
+assign FSErrorLim_val to "{device}:FSErrorLim_val";
+
+ss ss1 {
+    state PowerOnReset_delay_state {
+		when(delay(0.5)){
+		} state PowerOnReset_state
+	}
+	state PowerOnReset_state {
+		option -e;
+		entry { 
+		   printf("Entry PowerOnReset_state\n\r");
+		   snlState = 0;
+		   pvPut(snlState,SYNC);
+		   CL_enable = 0;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   jog_enable = 0;  // jog is not enabled
+		   pvPut(jog_enable,SYNC);
+		   fanout_snlState_val = 1; // in power on reset mode
+		   pvPut(fanout_snlState_val,SYNC);
+		   setCounterControl = 0;	// ready internal counter of drive for write
+		   pvPut(setCounterControl,SYNC);
+		   printf("CL DISABLED | JOG DISABLED | FANOUT 1\n\r");
+		}
+		when (snlState==1) {	
+			printf("##Requested CL_state\n\r");
+			calibrate();
+		} state CL_delay_state
+		when (snlState==2) {	
+			printf("##Requested OL_state\n\r");
+			calibrate();
+		} state OL_delay_state
+    }
+	state CL_delay_state {
+		when(delay(0.5)){
+		} state CL_state
+	}
+	state CL_state {
+		option -e;
+		entry { 
+		   printf("Entry CL_state\n\r");
+		   snlState = 1;
+		   pvPut(snlState,SYNC);
+		   CL_enable = 1;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   jog_enable = 0;  // jog is not enabled
+		   pvPut(jog_enable,SYNC);
+		   fanout_snlState_val = 2; // in closed loop mode
+		   pvPut(fanout_snlState_val,SYNC);
+		   setCounterControl = 0;	// ready internal counter of drive for write
+		   pvPut(setCounterControl,SYNC);
+		   printf("CL ENABLED | JOG DISABLED | FANOUT 2\n\r");
+		}
+		when (snlState==0) {	
+			printf("##Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_delay_state
+		when (snlState==2) {	
+			printf("##Requested OL_state\n\r");
+			calibrate();
+		} state OL_delay_state
+    }
+	state OL_delay_state {
+		when(delay(0.5)){
+		} state OL_state
+	}
+	state OL_state {
+		option -e;
+		entry { 
+		   printf("Entry OL_state\n\r");
+		   snlState = 2;
+		   pvPut(snlState,SYNC);
+		   CL_enable = 0;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   jog_enable = 1;  // jog is not enabled
+		   pvPut(jog_enable,SYNC);
+		   fanout_snlState_val = 3; // in open loop mode
+		   pvPut(fanout_snlState_val,SYNC);
+		   setCounterControl = 0;	// ready internal counter of drive for write
+		   pvPut(setCounterControl,SYNC);
+		   printf("CL DISABLED | JOG ENABLED | FANOUT 3\n\r");
+		}
+		when (snlState==0) {	
+			printf("##Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_delay_state
+		when (snlState==1) {	
+			printf("##Requested CL_state\n\r");
+			calibrate();
+		} state CL_delay_state
+    }
+}
+
+void calibrate()
+{
+   if(snlCLFeedback==0){	// Mechanical Encoder
+		if(snlHomeMethod==0)	// self
+		{
+			calCounterMechEnc();
+			strcpy(CL_FSSensor, "INTERNAL COUNTER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else if(snlHomeMethod==1)	// mechanical encoder
+		{
+			calCounterMechEnc();
+			strcpy(CL_FSSensor, "MECHANICAL ENCODER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else if(snlHomeMethod==2) // potentiometer
+		{
+			calCounterPot();
+			strcpy(CL_FSSensor, "POTENTIOMETER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else 	// limit switch
+		{
+		   /* executes when the none of the above condition is true */
+		}
+		FSErrorLim_val = 2;
+		pvPut(FSErrorLim_val,SYNC);
+		// set actual and dist setpoints
+		CL_setpoint_dist = encCalc_ENG;
+		pvPut(CL_setpoint_dist, SYNC);
+		// choose feedback sensor
+		fanout_snlCLFeedback_val = 1;
+		pvPut(fanout_snlCLFeedback_val, SYNC);
+		// show on CSS GUI
+		strcpy(CL_FBSensor, "MECHANICAL ENCODER");
+		pvPut(CL_FBSensor,SYNC);
+	}
+	if(snlCLFeedback==1){	// Potentiometer
+		if(snlHomeMethod==0)	// self
+		{
+			calCounterPot();
+			strcpy(CL_FSSensor, "INTERNAL COUNTER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else if(snlHomeMethod==1)	// mechanical encoder
+		{
+			calCounterMechEnc();
+			strcpy(CL_FSSensor, "MECHANICAL ENCODER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else if(snlHomeMethod==2) // potentiometer
+		{
+			calCounterPot();
+			strcpy(CL_FSSensor, "POTENTIOMETER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else 	// limit switch
+		{
+		   /* executes when the none of the above condition is true */
+		}
+		FSErrorLim_val = 3;
+		pvPut(FSErrorLim_val,SYNC);
+		// set actual and dist setpoints
+		CL_setpoint_dist = potChVal_ENG;
+		pvPut(CL_setpoint_dist, SYNC);
+		// choose feedback sensor
+		fanout_snlCLFeedback_val = 2;
+		pvPut(fanout_snlCLFeedback_val, SYNC);
+		// show on CSS GUI
+		strcpy(CL_FBSensor, "POTENTIOMETER");
+		pvPut(CL_FBSensor,SYNC);
+	}
+	if(snlCLFeedback==2){	// Internal Counter
+		if(snlHomeMethod==0)	// self
+		{
+			FSErrorLim_val = 4;
+			pvPut(FSErrorLim_val,SYNC);
+			calCounterSelf();
+			// set actual and dist setpoints
+			CL_setpoint_dist = 0;
+			pvPut(CL_setpoint_dist, SYNC);
+			strcpy(CL_FSSensor, "INTERNAL COUNTER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else if(snlHomeMethod==1)	// mechanical encoder
+		{
+			FSErrorLim_val = 2;
+			pvPut(FSErrorLim_val,SYNC);
+			calCounterMechEnc();
+			// set actual and dist setpoints
+			CL_setpoint_dist = encCalc/dist_Encoder;
+			pvPut(CL_setpoint_dist, SYNC);
+			strcpy(CL_FSSensor, "MECHANICAL ENCODER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else if(snlHomeMethod==2) // potentiometer
+		{
+			FSErrorLim_val = 3;
+			pvPut(FSErrorLim_val,SYNC);
+			calCounterPot();
+			// set internal counter value to pot value
+			CL_setpoint_dist = potChVal/dist_Pot;
+			pvPut(CL_setpoint_dist, SYNC);
+			strcpy(CL_FSSensor, "POTENTIOMETER");
+			pvPut(CL_FSSensor,SYNC);
+		}
+		else 	// limit switch
+		{
+		   /* executes when the none of the above condition is true */
+		}
+		// choose feedback sensor
+		fanout_snlCLFeedback_val = 3;
+		pvPut(fanout_snlCLFeedback_val, SYNC);
+		// show on CSS GUI
+		strcpy(CL_FBSensor, "INTERNAL COUNTER");
+		pvPut(CL_FBSensor,SYNC);
+	}
+}
+
+void calCounterMechEnc()
+{
+	// set internal counter value to mech encoder value
+	setCounterValue = fmod(((encCalc/dist_Encoder)*dist_Counter),65535.0);
+	pvPut(setCounterValue,SYNC);
+	setCounterControl = 1;
+	pvPut(setCounterControl,SYNC);
+	OUFlowCount = (encCalc/dist_Encoder)*dist_Counter-fmod(((encCalc/dist_Encoder)*dist_Counter),65535.0);
+	pvPut(OUFlowCount, SYNC);
+}
+
+void calCounterPot()
+{
+	// set internal counter value to pot value
+	setCounterValue = fmod(((potChVal/dist_Pot)*dist_Counter),65535.0);
+	pvPut(setCounterValue,SYNC);
+	setCounterControl = 1;
+	pvPut(setCounterControl,SYNC);
+	OUFlowCount = (potChVal/dist_Pot)*dist_Counter-fmod(((potChVal/dist_Pot)*dist_Counter),65535.0);
+	pvPut(OUFlowCount, SYNC);
+}
+
+void calCounterSelf()
+{
+	// set internal counter value to zero
+	setCounterValue = 0;
+	pvPut(setCounterValue,SYNC);
+	setCounterControl = 1;
+	pvPut(setCounterControl,SYNC);
+	OUFlowCount = 0;
+	pvPut(OUFlowCount, SYNC);
+}

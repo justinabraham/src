@@ -1,0 +1,1 @@
+../../bin/linux-x86_64/scanner -m 0 -q etc/scanner-sdos.xml "/tmp/scan1"

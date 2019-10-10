@@ -1,0 +1,8 @@
+drvVipc616.o: ../drvVipc616.c /epics/base/include/devLib.h \
+ /epics/base/include/devLibVME.h /epics/base/include/dbDefs.h \
+ /epics/base/include/os/Linux/osdVME.h /epics/base/include/errMdef.h \
+ /epics/base/include/shareLib.h /epics/base/include/devLib.h \
+ /epics/base/include/devLibVMEImpl.h /epics/base/include/iocsh.h \
+ /epics/base/include/epicsExport.h /epics/base/include/shareLib.h \
+ ../drvIpac.h /epics/base/include/epicsTypes.h \
+ /epics/base/include/errMdef.h

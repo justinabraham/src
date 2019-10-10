@@ -1,0 +1,22 @@
+For use in synApps, I modified the following files:
+
+Makefile:
+changed this:
+	DIRS := $(DIRS) ADBinaries
+
+	DIRS := $(DIRS) ADCore
+	ADCore_DEPEND_DIRS += ADBinaries
+to this:
+	DIRS := $(DIRS) $(ADBINARIES)
+
+	DIRS := $(DIRS) $(ADCORE)
+	$(ADCORE)_DEPEND_DIRS += $(ADBINARIES)
+
+ADBinaries-R2-1/configure/RELEASE
+ADCore-R2-1/configure/RELEASE
+ADCore-R2-1/iocs/simDetectorIOC/configure/RELEASE
+
+-------------------------------------------------
+For use with ADCore-R2-2, added
+XML2_INCLUDE = -I/usr/include/libxml2
+to configure/CONFIG_SITE.local.linux*

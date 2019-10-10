@@ -1,0 +1,44 @@
+TOP=../..
+
+include $(TOP)/configure/CONFIG
+
+# IOC
+USR_SYS_LIBS += xml2
+#DBDINC += xxxRecord
+# Install devXxxSoft.dbd into <top>/dbd
+#DBD += xxxSupport.dbd
+
+DBD += scantest.dbd
+scantest_DBD += base.dbd ecAsyn.dbd asSupport.dbd 
+PROD_IOC = scantest
+scantest_SRCS += scantest_registerRecordDeviceDriver.cpp
+
+# These two lines are needed for non-vxWorks builds, such as Linux
+scantest_SRCS_DEFAULT += scantestMain.cpp
+scantest_SRCS_vxWorks += -nil-
+
+# Add locally compiled object code
+# scantest_SRCS +=
+
+# The following adds object code from base/src/vxWorks
+scantest_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+
+scantest_LIBS += ecAsyn asyn autosave scannerlib rtutils
+
+
+	snlVaultClearanceSequencer_SNCFLAGS += +r
+    scantest_DBD += snlVaultClearanceSequencer.dbd
+    scantest_SRCS += snlVaultClearanceSequencer.stt
+    #scantest_LIBS += seq pv 
+    scantest_LIBS += seq pv
+
+    # Build sncProgram as a standalone program
+    PROD_HOST += snlVaultClearanceSequencerProgram
+    snlVaultClearanceSequencerProgram_SNCFLAGS += +m
+    snlVaultClearanceSequencerProgram_SRCS += snlVaultClearanceSequencerProgram.st
+    snlVaultClearanceSequencerProgram_LIBS += seq pv
+    snlVaultClearanceSequencerProgram_LIBS += $(EPICS_BASE_HOST_LIBS)
+
+scantest_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+include $(TOP)/configure/RULES

@@ -1,0 +1,129 @@
+
+program snlStepperMotorSequencer
+%{#include <time.h>}%
+
+// EL7041 Stepper Motor Template Variables
+///////////////////////////////////////////
+double setCounterValue;
+assign setCounterValue to "JUSTIN:2:ENCCONTROLCOMPACT:SETCOUNTERVALUE";
+monitor setCounterValue;
+
+double setCounterControl;
+assign setCounterControl to "JUSTIN:2:ENCCONTROLCOMPACT:CONTROL__SETCOUNTER";
+monitor setCounterControl;
+
+// IOC variables
+//////////////////////////////////////////
+double snlState;
+assign snlState to "{device}:snlState";
+monitor snlState;
+
+double encCalc;
+assign encCalc to "{device}:encCalc";
+monitor encCalc;
+
+double encHomeVal;
+assign encHomeVal to "{device}:encHomeVal";
+monitor encHomeVal;
+
+double OUFlowCount;
+assign OUFlowCount to "{device}:OUFlowCount";
+monitor OUFlowCount;
+
+double isHomed;
+assign isHomed to "{device}:isHomed";
+
+double setpoint;
+assign setpoint to "{device}:setpoint";
+
+ss ss1 {
+    state PowerOnReset_state {
+		option -e;
+		entry { 
+		   printf("Entry PowerOnReset_state\n\r");
+		   snlState = 0;
+		   pvPut(snlState,SYNC);
+		   isHomed = 0;
+		   pvPut(isHomed,SYNC);
+		}
+		when (snlState==1) {	
+			printf("Requested Home_state\n\r");
+		} state Home_state
+		when (snlState==2) {	
+			printf("Motor must be Homed before Run\n\r");
+		} state PowerOnReset_state
+		when (snlState==3) {	
+			printf("Motor must be Homed before Jog\n\r");
+		} state PowerOnReset_state
+    }	
+    state Home_state {
+		option -e;
+		entry {
+			printf("Entry Home_state\n\r");
+			snlState = 1;
+			pvPut(snlState,SYNC);
+			setpoint = encHomeVal;
+			pvPut(setpoint,SYNC);
+			isHomed = 0;
+			pvPut(isHomed,SYNC);
+			setCounterControl = 0;
+			pvPut(setCounterControl,SYNC);
+		}
+		when(setpoint-encCalc==0){
+			setCounterValue = 0;
+			pvPut(setCounterValue,SYNC);
+			setCounterControl = 1;
+			pvPut(setCounterControl,SYNC);
+		} state Home_state0
+	}
+	state Home_state0 {
+		when(delay(0.5)){
+			;
+		} state Home_state1
+	}
+	state Home_state1 {
+		when(){
+			setCounterControl = 0;
+			pvPut(setCounterControl,SYNC);
+			OUFlowCount = 0;
+			pvPut(OUFlowCount, SYNC);
+			isHomed = 1;
+			pvPut(isHomed,SYNC);
+			printf("Motor is HOMED\n\r");
+		} state readyToRun_state
+	}
+	state readyToRun_state {
+		option -e;
+		entry {
+			printf("Entry readyToRun_state\n\r");
+			snlState = 2;
+			pvPut(snlState,SYNC);
+		}
+		when (snlState==0) {	
+			printf("Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_state
+		when (snlState==1) {	
+			printf("Requested Home_state\n\r");
+		} state Home_state
+		when (snlState==3) {	
+			printf("Requested jog_state\n\r");;
+		} state jog_state
+	}
+	state jog_state {
+		option -e;
+		entry {
+			printf("Entry jog_state\n\r");
+			snlState = 3;
+			pvPut(snlState,SYNC);
+		}
+		when (snlState==0) {	
+			printf("Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_state
+		when (snlState==1) {	
+			printf("Requested Home_state\n\r");
+		} state Home_state
+		when (snlState==2) {	
+			printf("Requested readyToRun_state\n\r");
+		} state readyToRun_state
+	}
+}

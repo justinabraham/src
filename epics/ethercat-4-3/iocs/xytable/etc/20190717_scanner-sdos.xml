@@ -1,0 +1,487 @@
+<scanner>
+<devices>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL2xxx.xml -->
+  <device name="EL2624" vendor="0x00000002" product="0x0a403052" revision="0x00120000">
+    <sync index="0"  dir="Outputs"  watchdog="0">
+      <pdo name="Channel 1" index="0x00001600">
+        <entry name="Output" index="0x00007000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 2" index="0x00001601">
+        <entry name="Output" index="0x00007010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 3" index="0x00001602">
+        <entry name="Output" index="0x00007020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 4" index="0x00001603">
+        <entry name="Output" index="0x00007030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL1xxx.xml -->
+  <device name="EL1808" vendor="0x00000002" product="0x07103052" revision="0x00110000">
+    <sync index="0"  dir="Inputs"  watchdog="0">
+      <pdo name="Channel 1" index="0x00001a00">
+        <entry name="Input" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 2" index="0x00001a01">
+        <entry name="Input" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 3" index="0x00001a02">
+        <entry name="Input" index="0x00006020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 4" index="0x00001a03">
+        <entry name="Input" index="0x00006030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 5" index="0x00001a04">
+        <entry name="Input" index="0x00006040" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 6" index="0x00001a05">
+        <entry name="Input" index="0x00006050" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 7" index="0x00001a06">
+        <entry name="Input" index="0x00006060" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 8" index="0x00001a07">
+        <entry name="Input" index="0x00006070" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL31xx.xml -->
+  <device name="EL3162" vendor="0x00000002" product="0x0c5a3052" revision="0x00130000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+      <pdo name="Channel 1" index="0x00001a00">
+        <entry name="Status" index="0x00003101" subindex="0x00000001" bit_length="8" datatype="USINT" oversample="0" />
+        <entry name="Value" index="0x00003101" subindex="0x00000002" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="Channel 2" index="0x00001a01">
+        <entry name="Status" index="0x00003102" subindex="0x00000001" bit_length="8" datatype="USINT" oversample="0" />
+        <entry name="Value" index="0x00003102" subindex="0x00000002" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL1xxx.xml -->
+  <device name="EL1809" vendor="0x00000002" product="0x07113052" revision="0x00120000">
+    <sync index="0"  dir="Inputs"  watchdog="0">
+      <pdo name="Channel 1" index="0x00001a00">
+        <entry name="Input" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 2" index="0x00001a01">
+        <entry name="Input" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 3" index="0x00001a02">
+        <entry name="Input" index="0x00006020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 4" index="0x00001a03">
+        <entry name="Input" index="0x00006030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 5" index="0x00001a04">
+        <entry name="Input" index="0x00006040" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 6" index="0x00001a05">
+        <entry name="Input" index="0x00006050" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 7" index="0x00001a06">
+        <entry name="Input" index="0x00006060" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 8" index="0x00001a07">
+        <entry name="Input" index="0x00006070" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 9" index="0x00001a08">
+        <entry name="Input" index="0x00006080" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 10" index="0x00001a09">
+        <entry name="Input" index="0x00006090" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 11" index="0x00001a0a">
+        <entry name="Input" index="0x000060a0" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 12" index="0x00001a0b">
+        <entry name="Input" index="0x000060b0" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 13" index="0x00001a0c">
+        <entry name="Input" index="0x000060c0" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 14" index="0x00001a0d">
+        <entry name="Input" index="0x000060d0" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 15" index="0x00001a0e">
+        <entry name="Input" index="0x000060e0" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 16" index="0x00001a0f">
+        <entry name="Input" index="0x000060f0" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL32xx.xml -->
+  <device name="EL3214" vendor="0x00000002" product="0x0c8e3052" revision="0x00110000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+      <pdo name="RTD Inputs Channel 1" index="0x00001a00">
+        <entry name="Status__Underrange" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006000" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9985" index="0x00000000" subindex="0x00000000" bit_length="4" datatype="BOOL" oversample="0" />
+        <entry name="Status__Error" index="0x00006000" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9986" index="0x00000000" subindex="0x00000000" bit_length="7" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006000" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006000" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006000" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="RTD Inputs Channel 2" index="0x00001a01">
+        <entry name="Status__Underrange" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006010" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9987" index="0x00000000" subindex="0x00000000" bit_length="4" datatype="BOOL" oversample="0" />
+        <entry name="Status__Error" index="0x00006010" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9988" index="0x00000000" subindex="0x00000000" bit_length="7" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006010" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006010" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006010" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="RTD Inputs Channel 3" index="0x00001a02">
+        <entry name="Status__Underrange" index="0x00006020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006020" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9989" index="0x00000000" subindex="0x00000000" bit_length="4" datatype="BOOL" oversample="0" />
+        <entry name="Status__Error" index="0x00006020" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9990" index="0x00000000" subindex="0x00000000" bit_length="7" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006020" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006020" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006020" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="RTD Inputs Channel 4" index="0x00001a03">
+        <entry name="Status__Underrange" index="0x00006030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006030" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9991" index="0x00000000" subindex="0x00000000" bit_length="4" datatype="BOOL" oversample="0" />
+        <entry name="Status__Error" index="0x00006030" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap9992" index="0x00000000" subindex="0x00000000" bit_length="7" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006030" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006030" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006030" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL4xxx.xml -->
+  <device name="EL4104" vendor="0x00000002" product="0x10083052" revision="0x03fc0000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+      <pdo name="AO Output Channel 1" index="0x00001600">
+        <entry name="Analog output" index="0x00007000" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AO Output Channel 2" index="0x00001601">
+        <entry name="Analog output" index="0x00007010" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AO Output Channel 3" index="0x00001602">
+        <entry name="Analog output" index="0x00007020" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AO Output Channel 4" index="0x00001603">
+        <entry name="Analog output" index="0x00007030" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL2xxx.xml -->
+  <device name="EL2004" vendor="0x00000002" product="0x07d43052" revision="0x00120000">
+    <sync index="0"  dir="Outputs"  watchdog="0">
+      <pdo name="Channel 1" index="0x00001600">
+        <entry name="Output" index="0x00007000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 2" index="0x00001601">
+        <entry name="Output" index="0x00007010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 3" index="0x00001602">
+        <entry name="Output" index="0x00007020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 4" index="0x00001603">
+        <entry name="Output" index="0x00007030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EK11xx.xml -->
+  <device name="EK1100" vendor="0x00000002" product="0x044c2c52" revision="0x00120000">
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL32xx.xml -->
+  <device name="EL3255" vendor="0x00000002" product="0x0cb73052" revision="0x00160000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+      <pdo name="AI Standard Channel 1" index="0x00001a00">
+        <entry name="Status__Underrange" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006000" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006000" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006000" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006000" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10051" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10052" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006000" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006000" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006000" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006000" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 2" index="0x00001a02">
+        <entry name="Status__Underrange" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006010" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006010" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006010" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006010" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10053" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10054" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006010" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006010" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006010" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006010" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 3" index="0x00001a04">
+        <entry name="Status__Underrange" index="0x00006020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006020" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006020" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006020" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006020" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10055" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10056" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006020" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006020" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006020" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006020" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 4" index="0x00001a06">
+        <entry name="Status__Underrange" index="0x00006030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006030" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006030" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006030" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006030" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10057" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10058" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006030" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006030" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006030" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006030" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 5" index="0x00001a08">
+        <entry name="Status__Underrange" index="0x00006040" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006040" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006040" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006040" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006040" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10059" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap10060" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006040" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006040" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006040" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006040" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL31xx.xml -->
+  <device name="EL3154" vendor="0x00000002" product="0x0c523052" revision="0x00140000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+      <pdo name="AI Standard Channel 1" index="0x00001a00">
+        <entry name="Status__Underrange" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006000" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006000" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006000" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006000" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5882" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5883" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006000" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006000" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006000" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006000" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 2" index="0x00001a02">
+        <entry name="Status__Underrange" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006010" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006010" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006010" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006010" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5884" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5885" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006010" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006010" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006010" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006010" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 3" index="0x00001a04">
+        <entry name="Status__Underrange" index="0x00006020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006020" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006020" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006020" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006020" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5886" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5887" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006020" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006020" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006020" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006020" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 4" index="0x00001a06">
+        <entry name="Status__Underrange" index="0x00006030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006030" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006030" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006030" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006030" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5888" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap5889" index="0x00000000" subindex="0x00000000" bit_length="5" datatype="BOOL" oversample="0" />
+        <entry name="Status__Sync error" index="0x00006030" subindex="0x0000000e" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006030" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006030" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006030" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL2xxx.xml -->
+  <device name="EL2808" vendor="0x00000002" product="0x0af83052" revision="0x00110000">
+    <sync index="0"  dir="Outputs"  watchdog="0">
+      <pdo name="Channel 1" index="0x00001600">
+        <entry name="Output" index="0x00007000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 2" index="0x00001601">
+        <entry name="Output" index="0x00007010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 3" index="0x00001602">
+        <entry name="Output" index="0x00007020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 4" index="0x00001603">
+        <entry name="Output" index="0x00007030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 5" index="0x00001604">
+        <entry name="Output" index="0x00007040" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 6" index="0x00001605">
+        <entry name="Output" index="0x00007050" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 7" index="0x00001606">
+        <entry name="Output" index="0x00007060" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+      <pdo name="Channel 8" index="0x00001607">
+        <entry name="Output" index="0x00007070" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+  <!-- parsed from file /epics/ethercat-4-3/etc/xml/Beckhoff EL30xx.xml -->
+  <device name="EL3064" vendor="0x00000002" product="0x0bf83052" revision="0x00140000">
+    <sync index="0"  dir="MBoxOut"  watchdog="0">
+    </sync>
+    <sync index="1"  dir="MBoxIn"  watchdog="0">
+    </sync>
+    <sync index="2"  dir="Outputs"  watchdog="0">
+    </sync>
+    <sync index="3"  dir="Inputs"  watchdog="0">
+      <pdo name="AI Standard Channel 1" index="0x00001a00">
+        <entry name="Status__Underrange" index="0x00006000" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006000" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006000" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006000" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006000" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11823" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11824" index="0x00000000" subindex="0x00000000" bit_length="6" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006000" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006000" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006000" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 2" index="0x00001a02">
+        <entry name="Status__Underrange" index="0x00006010" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006010" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006010" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006010" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006010" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11825" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11826" index="0x00000000" subindex="0x00000000" bit_length="6" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006010" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006010" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006010" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 3" index="0x00001a04">
+        <entry name="Status__Underrange" index="0x00006020" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006020" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006020" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006020" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006020" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11827" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11828" index="0x00000000" subindex="0x00000000" bit_length="6" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006020" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006020" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006020" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+      <pdo name="AI Standard Channel 4" index="0x00001a06">
+        <entry name="Status__Underrange" index="0x00006030" subindex="0x00000001" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Overrange" index="0x00006030" subindex="0x00000002" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Limit 1" index="0x00006030" subindex="0x00000003" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Limit 2" index="0x00006030" subindex="0x00000005" bit_length="2" datatype="BIT2" oversample="0" />
+        <entry name="Status__Error" index="0x00006030" subindex="0x00000007" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11829" index="0x00000000" subindex="0x00000000" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__Gap11830" index="0x00000000" subindex="0x00000000" bit_length="6" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO State" index="0x00006030" subindex="0x0000000f" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Status__TxPDO Toggle" index="0x00006030" subindex="0x00000010" bit_length="1" datatype="BOOL" oversample="0" />
+        <entry name="Value" index="0x00006030" subindex="0x00000011" bit_length="16" datatype="INT" oversample="0" />
+      </pdo>
+    </sync>
+  </device>
+</devices>
+<chain>
+<device type_name="EK1100" revision="0x00120000" position="0" name="COUPLER.0" />
+<device type_name="EL2624" revision="0x00120000" position="1" name="REL.0" />
+<device type_name="EL2624" revision="0x00120000" position="2" name="REL.1" />
+<device type_name="EL2624" revision="0x00120000" position="3" name="REL.2" />
+<device type_name="EL1808" revision="0x00110000" position="4" name="DIN.0" />
+<device type_name="EL1808" revision="0x00110000" position="5" name="DIN.1" />
+<device type_name="EL1808" revision="0x00110000" position="6" name="DIN.2" />
+<device type_name="EL2808" revision="0x00110000" position="7" name="DOUT.0" />
+<device type_name="EL1808" revision="0x00110000" position="8" name="DIN.3" />
+<device type_name="EL3255" revision="0x00160000" position="9" name="POT.0" />
+<device type_name="EL2808" revision="0x00110000" position="10" name="DOUT.1" />
+<device type_name="EL1808" revision="0x00110000" position="11" name="DIN.4" />
+<device type_name="EL3064" revision="0x00140000" position="12" name="AIN.0" />
+<device type_name="EK1100" revision="0x00120000" position="13" name="COUPLER.1" />
+<device type_name="EL3162" revision="0x00130000" position="14" name="AIN.1" />
+<device type_name="EL3154" revision="0x00140000" position="15" name="AIN.2" />
+<device type_name="EL4104" revision="0x03fc0000" position="16" name="AOUT.0" />
+<device type_name="EL2004" revision="0x00120000" position="17" name="DOUT.2" />
+<device type_name="EL4104" revision="0x03fc0000" position="18" name="AOUT.1" />
+<device type_name="EL3214" revision="0x00110000" position="19" name="TEMP.0" />
+<device type_name="EL1809" revision="0x00120000" position="20" name="DIN.5" />
+</chain>
+<sdorequests>
+  ######################### POT.0 START #########################
+  <sdo name="SDO.POT.0.0X8000" slave="POT.0" index="0x8000" >
+    <sdoentry description="Enable filter ch1" subindex="0x06" bit_length="8" datatype="USINT" asynparameter="EnableFilterCh1" />
+	<sdoentry description="Filter settings global" subindex="0x15" bit_length="16" datatype="UINT" asynparameter="FilterSettingsGlobal" />
+  </sdo>
+  <sdo name="SDO.POT.0.0X8010" slave="POT.0" index="0x8010" >
+    <sdoentry description="Enable filter ch2" subindex="0x06" bit_length="8" datatype="USINT" asynparameter="EnableFilterCh2" />
+  </sdo>
+  <sdo name="SDO.POT.0.0X8020" slave="POT.0" index="0x8020" >
+    <sdoentry description="Enable filter ch3" subindex="0x06" bit_length="8" datatype="USINT" asynparameter="EnableFilterCh3" />
+  </sdo>
+  <sdo name="SDO.POT.0.0X8030" slave="POT.0" index="0x8030" >
+    <sdoentry description="Enable filter ch4" subindex="0x06" bit_length="8" datatype="USINT" asynparameter="EnableFilterCh4" />
+  </sdo>
+  <sdo name="SDO.POT.0.0X8040" slave="POT.0" index="0x8040" >
+    <sdoentry description="Enable filter ch5" subindex="0x06" bit_length="8" datatype="USINT" asynparameter="EnableFilterCh5" />
+  </sdo>
+  ######################### POT.0 END #########################
+</sdorequests>
+</scanner>
+

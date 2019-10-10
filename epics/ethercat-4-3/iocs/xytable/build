@@ -1,0 +1,4 @@
+make clean
+rm -f bin/linux-x86_64/snlVaultClearanceSequencerProgram
+make
+

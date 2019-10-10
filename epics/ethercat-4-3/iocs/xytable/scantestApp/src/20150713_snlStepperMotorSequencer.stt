@@ -1,0 +1,48 @@
+
+program snlStepperMotorSequencer
+%{#include <time.h>}%
+
+double testpv;
+assign testpv to "{device}:snlState";
+monitor testpv;
+
+double testpv2;
+assign testpv2 to "{device}:testpv2";
+
+
+
+
+ss ss1 {
+    state PowerOnReset_state {
+	option -e;
+	entry { 
+       printf("Entry PowerOnReset_state: Sequencer powered on \n\r");
+	}
+	when (testpv==1) {	
+	  printf("PowerOnReset_state: Sequencer powered on \n\r");
+	} state running_state
+	
+    }	
+
+
+    state running_state {
+	option -e;
+	entry { 
+       printf("Entry  Hello \n\r");
+	}
+	when (testpv >11) {
+	
+	     printf(">11\n\r");
+		 testpv2=testpv;
+		 pvPut(testpv2,SYNC);
+	    
+	    } state running_state
+	
+	when (testpv <=11) {
+	
+	     printf("<=10\n\r");
+	     testpv2=testpv;
+		 pvPut(testpv2,SYNC);
+	    } state running_state
+	}
+}

@@ -1,0 +1,100 @@
+
+program snlVaultClearanceSequencer
+%{#include <time.h>}%
+%{#include <string.h>}%
+%{#include <math.h>}%
+%{#include<stdio.h>}%
+%{#include<stdlib.h>}%
+
+// FIELD IO
+//////////////////////////////////////////
+double ZONE1_CLR_INP;
+assign ZONE1_CLR_INP to "{SAFETYIOC}:ZONE1_CLR_INP:INPUT";
+monitor ZONE1_CLR_INP;
+
+double ZONE2_CLR_INP;
+assign ZONE2_CLR_INP to "{SAFETYIOC}:ZONE2_CLR_INP:INPUT";
+monitor ZONE2_CLR_INP;
+
+double ZONE3_CLR_INP;
+assign ZONE3_CLR_INP to "{SAFETYIOC}:ZONE3_CLR_INP:INPUT";
+monitor ZONE3_CLR_INP;
+
+double DOOR1_CLOSED_INP;
+assign DOOR1_CLOSED_INP to "{SAFETYIOC}:DOOR1_CLOSED_INP:INPUT";
+monitor DOOR1_CLOSED_INP;
+
+double DOOR2_CLOSED_INP;
+assign DOOR2_CLOSED_INP to "{SAFETYIOC}:DOOR2_CLOSED_INP:INPUT";
+monitor DOOR2_CLOSED_INP;
+
+double DOOR3_CLOSED_INP;
+assign DOOR3_CLOSED_INP to "{SAFETYIOC}:DOOR3_CLOSED_INP:INPUT";
+monitor DOOR3_CLOSED_INP;
+
+// IOC variables
+//////////////////////////////////////////
+double VC_state;
+assign VC_state to "{SAFETYIOC}:VC_state";
+monitor VC_state;
+
+double VC_start_vault_clearance;
+assign VC_start_vault_clearance to "{SAFETYIOC}:VC_start_vault_clearance";
+monitor VC_start_vault_clearance;
+
+double VC_sim_key169;
+assign VC_sim_key169 to "{SAFETYIOC}:VC_sim_key169";
+monitor VC_sim_key169;
+
+double VC_sim_key70;
+assign VC_sim_key70 to "{SAFETYIOC}:VC_sim_key70";
+monitor VC_sim_key70;
+
+double VC_sim_key69;
+assign VC_sim_key69 to "{SAFETYIOC}:VC_sim_key69";
+monitor VC_sim_key69;
+
+double VC_zone1_clear;
+assign VC_zone1_clear to "{SAFETYIOC}:VC_zone1_clear";
+
+double VC_zone2_clear;
+assign VC_zone2_clear to "{SAFETYIOC}:VC_zone2_clear";
+
+double VC_zone3_clear;
+assign VC_zone3_clear to "{SAFETYIOC}:VC_zone3_clear";
+
+double VC_zone_button_toggle_ena;
+assign VC_zone_button_toggle_ena to "{SAFETYIOC}:VC_zone_button_toggle_ena";
+
+ss ss1 {
+	state Vault_not_clear_state {
+		option -e;
+		entry { 
+		   printf("Entry Vault not clear\n\r");
+		   VC_state = 0;
+		   pvPut(VC_state,SYNC);
+		   resetVC();
+		   printf("Vault clearance procedure reset");
+		}
+		when (1) {	
+			printf("Test\n\r");
+		} state Vault_not_clear_state
+    }
+}
+
+void resetVC()
+{
+	// reset all vault clearance
+	VC_start_vault_clearance = 0;
+	pvPut(VC_start_vault_clearance,SYNC);
+	//
+	VC_zone1_clear = 0;
+	pvPut(VC_zone1_clear,SYNC);
+	//
+	VC_zone2_clear = 0;
+	pvPut(VC_zone2_clear,SYNC);
+	//
+	VC_zone3_clear = 0;
+	pvPut(VC_zone3_clear,SYNC);
+	
+}

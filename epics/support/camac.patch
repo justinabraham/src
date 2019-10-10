@@ -1,0 +1,20 @@
+diff -Naur --exclude=.svn --exclude=CAMAC_IO.ui --exclude=RELEASE /home/oxygen/MOONEY/junk/synApps_5_8/support/camac-2-7/camacApp/devsrc/devCamacInclude.dbd camac-2-7/camacApp/devsrc/devCamacInclude.dbd
+--- /home/oxygen/MOONEY/junk/synApps_5_8/support/camac-2-7/camacApp/devsrc/devCamacInclude.dbd	2004-01-26 19:12:23.000000000 -0600
++++ camac-2-7/camacApp/devsrc/devCamacInclude.dbd	2014-11-11 13:15:32.460422000 -0600
+@@ -1,4 +1,5 @@
+ include "base.dbd"
++include "stdSupport.dbd"
+ include "stdVXSupport.dbd"
+ include "motorRecord.dbd"
+ include "devSoftMotor.dbd"
+diff -Naur --exclude=.svn --exclude=CAMAC_IO.ui --exclude=RELEASE /home/oxygen/MOONEY/junk/synApps_5_8/support/camac-2-7/camacApp/src/Makefile camac-2-7/camacApp/src/Makefile
+--- /home/oxygen/MOONEY/junk/synApps_5_8/support/camac-2-7/camacApp/src/Makefile	2003-07-09 13:34:21.000000000 -0500
++++ camac-2-7/camacApp/src/Makefile	2015-01-14 16:02:37.940341000 -0600
+@@ -25,4 +25,6 @@
+ include $(TOP)/configure/RULES
+ #----------------------------------------
+ #  ADD RULES AFTER THIS LINE
+-
++# Parallel build sometimes fails.
++# Make dependences on new records explicit.
++camacRecord$(OBJ): $(COMMON_DIR)/camacRecord.h

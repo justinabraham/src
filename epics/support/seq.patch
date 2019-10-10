@@ -1,0 +1,9 @@
+diff -Naur --exclude=.svn --exclude=RELEASE /home/oxygen/MOONEY/junk/synApps_5_8/support/seq-2-2-1/test/validate/pvAssignStress.st seq-2-2-1/test/validate/pvAssignStress.st
+--- /home/oxygen/MOONEY/junk/synApps_5_8/support/seq-2-2-1/test/validate/pvAssignStress.st	2015-01-13 06:47:16.000000000 -0600
++++ seq-2-2-1/test/validate/pvAssignStress.st	2015-01-13 10:40:11.743245000 -0600
+@@ -1,4 +1,4 @@
+-program pvAssignSubstTest
++program pvAssignStress
+ 
+ %%#include "../testSupport.h"
+ 

@@ -1,0 +1,5 @@
+file db/LERIB_STEPPER.db {
+    pattern {  IOC			, DEVICE        , MotorDrive		, SCAN			, SCAN_HRBT		}
+            { "XYTIOC"  	, "X"			, XYTABLE:2			, ".1 second"	, ".2 second"	}
+            { "XYTIOC"  	, "Y"			, XYTABLE:3			, ".1 second"	, ".2 second"	}
+}	

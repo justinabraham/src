@@ -1,0 +1,7 @@
+Some of the modules have been modified from their released versions to build
+with synApps.  The .patch files in this directory are patches that already have
+been applied.
+patch -p0 < file.patch
+
+make_3.14.12.5_linux-x86_64.out and make_3.15_linux-x86_64.out are
+records of successful builds

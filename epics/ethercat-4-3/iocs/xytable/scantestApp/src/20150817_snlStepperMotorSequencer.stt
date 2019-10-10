@@ -1,0 +1,297 @@
+
+program snlStepperMotorSequencer
+%{#include <time.h>}%
+%{#include <string.h>}%
+
+// EL7041 Stepper Motor Template Variables
+///////////////////////////////////////////
+double setCounterValue;
+assign setCounterValue to "JUSTIN:2:ENCCONTROLCOMPACT:SETCOUNTERVALUE";
+monitor setCounterValue;
+
+double setCounterControl;
+assign setCounterControl to "JUSTIN:2:ENCCONTROLCOMPACT:CONTROL__SETCOUNTER";
+monitor setCounterControl;
+
+double driveVelocity;
+assign driveVelocity to "JUSTIN:2:STMVELOCITY:VELOCITY";
+monitor driveVelocity;
+
+// IOC variables
+//////////////////////////////////////////
+double snlState;
+assign snlState to "{device}:snlState";
+monitor snlState;
+
+double CL_setpoint;
+assign CL_setpoint to "{device}:CL_setpoint";
+monitor CL_setpoint;
+
+double encCalc;
+assign encCalc to "{device}:encCalc";
+monitor encCalc;
+
+double encHomeVal;
+assign encHomeVal to "{device}:encHomeVal";
+monitor encHomeVal;
+
+double OUFlowCount;
+assign OUFlowCount to "{device}:OUFlowCount";
+monitor OUFlowCount;
+
+double scaleFact_C2E;
+assign scaleFact_C2E to "{device}:scaleFact_C2E";
+
+double CL_enable;
+assign CL_enable to "{device}:CL_enable";
+
+double CL_error;
+assign CL_error to "{device}:CL_error";
+
+double CL_pError;
+assign CL_pError to "{device}:CL_pError";
+
+double CL_integral;
+assign CL_integral to "{device}:CL_integral";
+
+double CL_derivative;
+assign CL_derivative to "{device}:CL_derivative";
+
+double jog_enable;
+assign jog_enable to "{device}:jog_enable";
+
+double fanout_lvl1_val;
+assign fanout_lvl1_val to "{device}:fanout_lvl1_val";
+
+double isHomed;
+assign isHomed to "{device}:isHomed";
+
+string terminalPrint;
+assign terminalPrint to "{device}:terminalPrint";
+
+// Sequencer internal variables
+//////////////////////////////////////////
+double fastHomeVel = 1000;
+double slowHomeVel = 100;
+double fastSlowDel = 20;	// number of delta steps at which it switches from fast to slow velocity
+
+ss ss1 {
+    state PowerOnReset_state {
+		option -e;
+		entry { 
+		   printf("Entry PowerOnReset_state\n\r");
+		   strcpy(terminalPrint, "Entry PowerOnReset_state\n");
+		   pvPut(terminalPrint,SYNC);
+		   snlState = 0;
+		   pvPut(snlState,SYNC);
+		   isHomed = 0;	// motor is not homed
+		   pvPut(isHomed,SYNC);
+		   CL_enable = 0;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   fanout_lvl1_val = 1; // velocity in manual mode
+		   pvPut(fanout_lvl1_val,SYNC);
+		   printf("NOT HOMED | VEL MAN | CL DISABLED\n\r");
+		   strcpy(terminalPrint, "NOT HOMED | VEL MAN | CL DISABLED\n");
+		   pvPut(terminalPrint,SYNC);
+		}
+		when (snlState==1) {	
+			printf("##Requested Home_state\n\r");
+			strcpy(terminalPrint, "##Requested Home_state\n");
+			pvPut(terminalPrint,SYNC);
+		} state Home_state
+		when (snlState==2) {	
+			printf("##Requested readyToRun_state\n\r");
+			printf("Motor must be Homed before Run\n\r");
+		} state PowerOnReset_state
+		when (snlState==3) {	
+			printf("##Requested jog_state\n\r");
+		} state jog_state
+    }	
+    state Home_state {
+		option -e;
+		entry {
+			printf("Entry Home_state\n\r");
+			snlState = 1;
+			pvPut(snlState,SYNC);
+			CL_setpoint = encHomeVal;
+			pvPut(CL_setpoint,SYNC);
+			isHomed = 0;	// motor is not homed
+			pvPut(isHomed,SYNC);
+			CL_enable = 0;  // control loop is not enabled
+			pvPut(CL_enable,SYNC);
+			fanout_lvl1_val = 1; // velocity in manual mode
+			pvPut(fanout_lvl1_val,SYNC);
+			printf("NOT HOMED | VEL MAN | CL DISABLED\n\r");
+			setCounterControl = 0;
+			pvPut(setCounterControl,SYNC);
+		}
+		when(encHomeVal-encCalc==0){	// homed
+			setCounterValue = 10;
+			pvPut(setCounterValue,SYNC);
+			setCounterControl = 1;
+			pvPut(setCounterControl,SYNC);
+		} state Home_state0
+		when((encHomeVal-encCalc)>fastSlowDel){	// far forward
+			;
+		} state fastForward_state
+		when((encHomeVal-encCalc)>0){		// close forward
+			;
+		} state slowForward_state
+		when((encHomeVal-encCalc)<-fastSlowDel){	// far behind
+			;
+		} state fastBackward_state
+		when((encHomeVal-encCalc)<0){		// close behind
+			;
+		} state slowBackward_state
+	}
+	state fastForward_state {
+		option -e;
+		entry {
+			printf("Moving fastForward_state\n\r");
+			driveVelocity = fastHomeVel;
+			pvPut(driveVelocity,SYNC);
+		}
+		when((encHomeVal-encCalc)<=fastSlowDel){		// close forward
+			;
+		} state slowForward_state
+	}
+	state slowForward_state {
+		option -e;
+		entry {
+			printf("Moving slowForward_state\n\r");
+			driveVelocity = slowHomeVel;
+			pvPut(driveVelocity,SYNC);
+		}
+		when(encHomeVal-encCalc==0){	// homed
+			driveVelocity = 0;
+			pvPut(driveVelocity,SYNC);
+			setCounterValue = 0;
+			pvPut(setCounterValue,SYNC);
+			setCounterControl = 1;
+			pvPut(setCounterControl,SYNC);
+		} state Home_state0
+	}
+	state fastBackward_state {
+		option -e;
+		entry {
+			printf("Moving fastBackward_state\n\r");
+			driveVelocity = -fastHomeVel;
+			pvPut(driveVelocity,SYNC);
+		}
+		when((encHomeVal-encCalc)>=-fastSlowDel){		// close behind
+			;
+		} state slowBackward_state
+	}
+	state slowBackward_state {
+		option -e;
+		entry {
+			printf("Moving slowBackward_state\n\r");
+			driveVelocity = -slowHomeVel;
+			pvPut(driveVelocity,SYNC);
+		}
+		when(encHomeVal-encCalc==0){	// homed
+			driveVelocity = 0;
+			pvPut(driveVelocity,SYNC);
+			setCounterValue = 0;
+			pvPut(setCounterValue,SYNC);
+			setCounterControl = 1;
+			pvPut(setCounterControl,SYNC);
+		} state Home_state0
+	}
+	state Home_state0 {
+		when(delay(0.5)){
+			// reset CL variables to prevent jerk!!
+			CL_error = 0;
+			pvPut(CL_error,SYNC);
+			CL_pError = 0;
+			pvPut(CL_pError,SYNC);
+			CL_integral = 0;
+			pvPut(CL_integral,SYNC);
+			CL_derivative = 0;
+			pvPut(CL_derivative,SYNC);
+		} state Home_state1
+	}
+	state Home_state1 {
+		when(){
+			setCounterControl = 0;	// reset internal counter of drive
+			pvPut(setCounterControl,SYNC);
+			OUFlowCount = 0;
+			pvPut(OUFlowCount, SYNC);
+			isHomed = 1;	// motor IS homed
+			pvPut(isHomed,SYNC);
+			printf("MOTOR HOMED\n\r");
+		} state readyToRun_state
+	}
+	state readyToRun_state {
+		option -e;
+		entry {
+			printf("Entry readyToRun_state\n\r");
+			snlState = 2;
+			pvPut(snlState,SYNC);
+			fanout_lvl1_val = 2; // velocity in control loop mode
+			pvPut(fanout_lvl1_val,SYNC);
+			CL_setpoint = encCalc;	// reset CL_setpoint to prevent jerk from jog mode
+			pvPut(CL_setpoint,SYNC);
+			CL_enable = 1;	// control loop enabled
+			pvPut(CL_enable,SYNC);
+			printf("VEL AUTO | CL ENABLED\n\r");
+		}
+		when ((CL_setpoint-encCalc==0) & (snlState==0)) {
+			printf("##Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_state
+		when ((CL_setpoint-encCalc==0) & (snlState==1)) {	
+			printf("##Requested Home_state\n\r");
+			CL_enable = 0;  // control loop is not enabled
+			pvPut(CL_enable,SYNC);
+			fanout_lvl1_val = 1; // velocity in manual mode
+			pvPut(fanout_lvl1_val,SYNC);
+			printf("VEL MAN | CL DISABLED\n\r");
+		} state Home_state
+		when ((CL_setpoint-encCalc==0) & (snlState==3)) {	
+			printf("##Requested jog_state\n\r");
+			CL_enable = 0;  // control loop is not enabled
+			pvPut(CL_enable,SYNC);
+			fanout_lvl1_val = 1; // velocity in manual mode
+			pvPut(fanout_lvl1_val,SYNC);
+			printf("VEL MAN | CL DISABLED\n\r");
+		} state jog_state
+	}
+	state jog_state {
+		option -e;
+		entry {
+			printf("Entry jog_state\n\r");
+			snlState = 3;
+			pvPut(snlState,SYNC);
+			CL_enable = 0;  // control loop is not enabled
+			pvPut(CL_enable,SYNC);
+			fanout_lvl1_val = 3; // velocity in jog mode
+			pvPut(fanout_lvl1_val,SYNC);
+			printf("VEL JOG | CL DISABLED\n\r");
+			jog_enable = 1;	//enable jog
+			pvPut(jog_enable,SYNC);
+			printf("Jog enabled\n\r");
+		}
+		when (snlState==0) {	
+			printf("##Requested PowerOnReset_state\n\r");
+			jog_enable = 0;	//disable jog
+			pvPut(jog_enable,SYNC);
+			printf("Jog disabled\n\r");
+		} state PowerOnReset_state
+		when (snlState==1) {	
+			printf("##Requested Home_state\n\r");
+			jog_enable = 0;	//disable jog
+			pvPut(jog_enable,SYNC);
+			printf("Jog disabled\n\r");
+		} state Home_state
+		when ((snlState==2) & (isHomed==1)) {	
+			printf("##Requested readyToRun_state\n\r");
+			jog_enable = 0;	//disable jog
+			pvPut(jog_enable,SYNC);
+			printf("Jog disabled\n\r");
+		} state readyToRun_state
+		when ((snlState==2) & (isHomed!=1)) {
+			printf("##Requested readyToRun_state\n\r");		
+			printf("Motor must be Homed before Run\n\r");
+		} state jog_state
+	}
+}

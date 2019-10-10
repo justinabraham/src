@@ -1,0 +1,10 @@
+file ../../db/EK1100.template {
+    pattern {  DEVICE       ,  PORT     	,  SCAN     }
+            { "XYTABLE:1"  	, "COUPLER.0"	, "I/O Intr"}
+}
+
+file ../../db/modified/EL7041.template {
+    pattern {  DEVICE      	,  PORT      	,  SCAN     }
+            { "XYTABLE:2" 	, "DRIVE.0"		, "I/O Intr"}
+            { "XYTABLE:3" 	, "DRIVE.1"		, "I/O Intr"}
+}

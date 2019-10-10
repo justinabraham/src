@@ -1,0 +1,4 @@
+epicsEnvSet("ARCH","linux-x86_64")
+epicsEnvSet("IOC","ioctestArrayRingBuffer")
+epicsEnvSet("TOP","/home/justin/epicsdev/support/asyn-4-26")
+epicsEnvSet("EPICS_BASE","/epics/base")

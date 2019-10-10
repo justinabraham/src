@@ -1,0 +1,29 @@
+#RELEASE Location of external products
+# Run "gnumake clean uninstall install" in the application
+# top directory each time this file is changed.
+
+# edited to work with synApps' "make release" command - Tim Mooney
+
+TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+SUPPORT=/home/oxygen/MOONEY/distrib/synApps_5_8/support
+AREA_DETECTOR=$(SUPPORT)/areaDetector-R2-0
+EPICS_BASE=/home/oxygen/MOONEY/epics/bazaar/base-3.15
+ASYN=$(SUPPORT)/asyn-4-26
+ADBINARIES=$(AREA_DETECTOR)/ADBinaries-R2-2
+ADCORE=$(AREA_DETECTOR)/ADCore-R2-2
+CALC=$(SUPPORT)/calc-3-4-2-1
+BUSY=$(SUPPORT)/busy-1-6-1
+SSCAN=$(SUPPORT)/sscan-2-10-1
+AUTOSAVE=$(SUPPORT)/autosave-5-6-1
+
+-include $(TOP)/configure/RELEASE_PATHS.local
+-include $(TOP)/configure/RELEASE_PATHS.local.$(EPICS_HOST_ARCH)
+-include $(TOP)/configure/RELEASE_LIBS.local
+-include $(TOP)/configure/RELEASE.local
+
+TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
+# If you don't want to install into $(TOP) then
+# define INSTALL_LOCATION_APP here
+#INSTALL_LOCATION_APP=<fullpathname>
+
+

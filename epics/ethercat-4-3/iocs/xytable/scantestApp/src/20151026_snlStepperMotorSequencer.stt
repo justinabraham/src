@@ -1,0 +1,204 @@
+
+program snlStepperMotorSequencer
+%{#include <time.h>}%
+%{#include <string.h>}%
+%{#include <math.h>}%
+
+// EL7041 Stepper Motor Template Variables
+///////////////////////////////////////////
+double setCounterValue;
+assign setCounterValue to "MTPA:3:ENCCONTROLCOMPACT:SETCOUNTERVALUE";
+monitor setCounterValue;
+
+double setCounterControl;
+assign setCounterControl to "MTPA:3:ENCCONTROLCOMPACT:CONTROL__SETCOUNTER";
+monitor setCounterControl;
+
+double driveVelocity;
+assign driveVelocity to "MTPA:3:STMVELOCITY:VELOCITY";
+monitor driveVelocity;
+
+// IOC variables
+//////////////////////////////////////////
+double snlState;
+assign snlState to "{device}:snlState";
+monitor snlState;
+
+double encCalc;
+assign encCalc to "{device}:encCalc";
+monitor encCalc;
+
+double encCalc_ENG;
+assign encCalc_ENG to "{device}:encCalc_ENG";
+monitor encCalc_ENG;
+
+double potCh1Val;
+assign potCh1Val to "{device}:potCh1Val";
+monitor potCh1Val;
+
+double potCh1Val_ENG;
+assign potCh1Val_ENG to "{device}:potCh1Val_ENG";
+monitor potCh1Val_ENG;
+
+double OUFlowCount;
+assign OUFlowCount to "{device}:OUFlowCount";
+monitor OUFlowCount;
+
+double snlCLFeedback;
+assign snlCLFeedback to "{device}:snlCLFeedback";
+monitor snlCLFeedback;
+
+double dist_Encoder;
+assign dist_Encoder to "{device}:dist_Encoder";
+monitor dist_Encoder;
+
+double dist_Counter;
+assign dist_Counter to "{device}:dist_Counter";
+monitor dist_Counter;
+
+double dist_Pot;
+assign dist_Pot to "{device}:dist_Pot";
+monitor dist_Pot;
+
+double CL_enable;
+assign CL_enable to "{device}:CL_enable";
+
+double jog_enable;
+assign jog_enable to "{device}:jog_enable";
+
+double fanout_snlState_val;
+assign fanout_snlState_val to "{device}:fanout_snlState_val";
+
+double fanout_snlCLFeedback_val;
+assign fanout_snlCLFeedback_val to "{device}:fanout_snlCLFeedback_val";
+
+double CL_setpoint;
+assign CL_setpoint to "{device}:CL_setpoint";
+
+double CL_setpoint_dist;
+assign CL_setpoint_dist to "{device}:CL_setpoint_dist";
+
+ss ss1 {
+    state PowerOnReset_state {
+		option -e;
+		entry { 
+		   printf("Entry PowerOnReset_state\n\r");
+		   snlState = 0;
+		   pvPut(snlState,SYNC);
+		   CL_enable = 0;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   jog_enable = 0;  // jog is not enabled
+		   pvPut(jog_enable,SYNC);
+		   fanout_snlState_val = 1; // in power on reset mode
+		   pvPut(fanout_snlState_val,SYNC);
+		   setCounterControl = 0;	// ready internal counter of drive for write
+		   pvPut(setCounterControl,SYNC);
+		   printf("CL DISABLED | JOG DISABLED | FANOUT 1\n\r");
+		}
+		when (snlState==1) {	
+			printf("##Requested CL_state\n\r");
+			if(snlCLFeedback==0){
+				// Mechanical Encoder
+				setCounterValue = fmod(((encCalc/dist_Encoder)*dist_Counter),65535.0);
+				pvPut(setCounterValue,SYNC);
+				setCounterControl = 1;
+				pvPut(setCounterControl,SYNC);
+				OUFlowCount = (encCalc/dist_Encoder)*dist_Counter-fmod(((encCalc/dist_Encoder)*dist_Counter),65535.0);
+				pvPut(OUFlowCount, SYNC);
+				// choose feedback sensor
+				fanout_snlCLFeedback_val = 1;
+				pvPut(fanout_snlCLFeedback_val, SYNC);
+				// set actual and dist setpoints
+				CL_setpoint = encCalc;
+				pvPut(CL_setpoint, SYNC);
+				CL_setpoint_dist = encCalc_ENG;
+				pvPut(CL_setpoint_dist, SYNC);
+			}
+			if(snlCLFeedback==1){
+				// Potentiometer
+				setCounterValue = fmod(((potCh1Val/dist_Pot)*dist_Counter),65535.0);
+				pvPut(setCounterValue,SYNC);
+				setCounterControl = 1;
+				pvPut(setCounterControl,SYNC);
+				OUFlowCount = (potCh1Val/dist_Pot)*dist_Counter-fmod(((potCh1Val/dist_Pot)*dist_Counter),65535.0);
+				pvPut(OUFlowCount, SYNC);
+				// choose feedback sensor
+				fanout_snlCLFeedback_val = 2;
+				pvPut(fanout_snlCLFeedback_val, SYNC);
+				// set actual and dist setpoints
+				CL_setpoint = potCh1Val;
+				pvPut(CL_setpoint, SYNC);
+				CL_setpoint_dist = potCh1Val_ENG;
+				pvPut(CL_setpoint_dist, SYNC);
+			}
+			if(snlCLFeedback==2){
+				// Internal Counter
+				setCounterValue = 0;
+				pvPut(setCounterValue,SYNC);
+				setCounterControl = 1;
+				pvPut(setCounterControl,SYNC);
+				OUFlowCount = 0;
+				pvPut(OUFlowCount, SYNC);
+				// choose feedback sensor
+				fanout_snlCLFeedback_val = 3;
+				pvPut(fanout_snlCLFeedback_val, SYNC);
+				// set actual and dist setpoints
+				CL_setpoint = 0;
+				pvPut(CL_setpoint, SYNC);
+				CL_setpoint_dist = 0;
+				pvPut(CL_setpoint_dist, SYNC);
+			}
+		} state CL_delay_state
+		when (snlState==2) {	
+			printf("##Requested OL_state\n\r");
+		} state OL_state
+    }
+	state CL_delay_state {
+		when(delay(0.5)){
+		} state CL_state
+	}
+	state CL_state {
+		option -e;
+		entry { 
+		   printf("Entry CL_state\n\r");
+		   snlState = 1;
+		   pvPut(snlState,SYNC);
+		   CL_enable = 1;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   jog_enable = 0;  // jog is not enabled
+		   pvPut(jog_enable,SYNC);
+		   fanout_snlState_val = 2; // in closed loop mode
+		   pvPut(fanout_snlState_val,SYNC);
+		   printf("CL ENABLED | JOG DISABLED | FANOUT 2\n\r");
+		}
+		when (snlState==0) {	
+			printf("##Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_state
+		when (snlState==2) {	
+			printf("##Requested OL_state\n\r");
+		} state OL_state
+    }
+	state OL_state {
+		option -e;
+		entry { 
+		   printf("Entry OL_state\n\r");
+		   snlState = 2;
+		   pvPut(snlState,SYNC);
+		   CL_enable = 0;  // control loop is not enabled
+		   pvPut(CL_enable,SYNC);
+		   jog_enable = 1;  // jog is not enabled
+		   pvPut(jog_enable,SYNC);
+		   fanout_snlState_val = 3; // in open loop mode
+		   pvPut(fanout_snlState_val,SYNC);
+		   setCounterControl = 0;	// ready internal counter of drive for write
+		   pvPut(setCounterControl,SYNC);
+		   printf("CL DISABLED | JOG ENABLED | FANOUT 3\n\r");
+		}
+		when (snlState==0) {	
+			printf("##Requested PowerOnReset_state\n\r");
+		} state PowerOnReset_state
+		when (snlState==1) {	
+			printf("##Requested CL_state\n\r");
+		} state CL_state
+    }
+}

@@ -1,0 +1,18 @@
+su
+
+apt-get update
+
+apt-get install sudo
+
+adduser $new_username
+adduser $new_username sudo
+
+nano /etc/sudoers
+Under the line ”%sudo ALL=(ALL:ALL) ALL” add line 
+$new_username ALL=(ALL:ALL) ALL
+
+reboot
+
+sudo deluser $old_username
+cd /home/
+sudo rm -r /$old_username/

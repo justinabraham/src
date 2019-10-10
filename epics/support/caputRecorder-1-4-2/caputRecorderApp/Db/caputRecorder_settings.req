@@ -1,0 +1,9 @@
+$(P)caputRecorderUsers
+$(P)caputRecorderHosts
+$(P)caputRecorderPrefixes
+$(P)caputRecorderDelaySec
+$(P)caputRecorderWaitCBSec
+$(P)caputRecorderDebug
+$(P)caputRecorderRecordTiming
+$(P)caputRecorderWaitCompletion
+$(P)caputRecorderIfMacroExists
