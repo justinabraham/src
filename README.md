@@ -4,6 +4,10 @@ This toolchain was tested on a desktop machine with Intel(R) Core(TM) i7-4770 CP
 
 The OS is a "headless" or network install of Debian GNU/Linux 10.1.0 (buster) running kernerl 4.19.0-6-rt-amd64 which has the PREEMPT RT patch applied.
 
+## Installation of PREEMPT RT patch
+
+
+
 cd into where the install scripts sit
 	cd install/
 
