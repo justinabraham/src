@@ -1,9 +1,7 @@
 This archive has been tested on a Debian Buster 10.1.0 kernel 4.19.0-6-rt-amd64 #1 SMP PREEMPT RT Debian 4.19.67-2+deb10u1 (2019-09-20) x86_64 GNU/Linux
 
-The following steps assume that you have registered the MAC of the primary NIC on the Control Net DHCP with IT support
-
 cd into where the install scripts sit
-	cd install_scripts/
+	cd install/
 
 su -c ./1_machine_settings.sh
 	This script sets up the network interface cards, proxies and repositories
