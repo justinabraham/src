@@ -35,17 +35,20 @@ AC_PREREQ(2.59)
 # - Write NEWS entry with changes since last release
 # - Check for complete Doxygen comments
 # - Update version number in documentation
-# - Update the ChangeLog -> hg log -bstable-1.5 --style=changelog > ChangeLog
+# - Update the ChangeLog -> git log > ChangeLog
 # - Update version number below
 # - make dist-bzip2
 #
 AC_INIT([ethercat],[1.5.2],[fp@igh-essen.com])
 AC_CONFIG_AUX_DIR([autoconf])
-AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
-AC_PREFIX_DEFAULT([/opt/etherlab])
+AM_INIT_AUTOMAKE([-Wall -Wno-override -Werror dist-bzip2 subdir-objects])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_MACRO_DIR([m4])
+AC_PROG_SED
+PKG_PROG_PKG_CONFIG
+PKG_INSTALLDIR()
 
 #------------------------------------------------------------------------------
 # Global
@@ -57,8 +60,41 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 #------------------------------------------------------------------------------
+# Kernel modules
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([whether to build kernel modules])
+
+AC_ARG_ENABLE([kernel],
+    AS_HELP_STRING([--enable-kernel],
+                   [Enable building kernel modules]),
+    [
+        case "${enableval}" in
+            yes) enablekernel=1
+                ;;
+            no) enablekernel=0
+                ;;
+            *) AC_MSG_ERROR([Invalid value for --enable-generic])
+                ;;
+        esac
+    ],
+    [enablekernel=1]
+)
+
+if test "x$enablekernel" = "x1"; then
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL(ENABLE_KERNEL, test "x$enablekernel" = "x1")
+AC_SUBST(ENABLE_KERNEL,[$enablekernel])
+
+#------------------------------------------------------------------------------
 # Linux sources
 #------------------------------------------------------------------------------
+
+if test "x$enablekernel" = "x1"; then
 
 AC_ARG_WITH([linux-dir],
     AC_HELP_STRING(
@@ -116,6 +152,8 @@ linuxversion=`echo $kernelrelease | grep -oE "$regex"`
 AC_SUBST(LINUX_SOURCE_DIR,[$sourcedir])
 AC_MSG_RESULT([$LINUX_SOURCE_DIR (Kernel $linuxversion)])
 
+fi
+
 #------------------------------------------------------------------------------
 # Linux module installation subdirectory
 #------------------------------------------------------------------------------
@@ -150,7 +188,7 @@ AC_ARG_ENABLE([generic],
                 ;;
         esac
     ],
-    [enablegeneric=1]
+    [enablegeneric=$enablekernel]
 )
 
 AM_CONDITIONAL(ENABLE_GENERIC, test "x$enablegeneric" = "x1")
@@ -173,7 +211,7 @@ AC_ARG_ENABLE([8139too],
                 ;;
         esac
     ],
-    [enable8139too=1]
+    [enable8139too=$enablekernel]
 )
 
 AM_CONDITIONAL(ENABLE_8139TOO, test "x$enable8139too" = "x1")
@@ -357,7 +395,7 @@ AC_ARG_WITH([e1000e-kernel],
     ]
 )
 
-e1000elayout34=0
+e1000elayout=0
 
 if test "x${enablee1000e}" = "x1"; then
     AC_MSG_CHECKING([for kernel for e1000e driver])
@@ -375,14 +413,18 @@ if test "x${enablee1000e}" = "x1"; then
 
     AC_MSG_RESULT([$kernele1000e])
 
-    # check for e1000e file layout (changed in kernel 3.4)
+    # check for e1000e file layout (changed in kernel 3.4 and 3.10)
     AC_MSG_CHECKING([for e1000e source layout])
 
     file34="${srcdir}/devices/e1000e/80003es2lan-$kernele1000e-ethercat.c"
+    file310="${srcdir}/devices/e1000e/ptp-$kernele1000e-ethercat.c"
 
-    if test -r "$file34"; then
+    if test -r "$file310"; then
+        AC_MSG_RESULT([>= 3.10])
+        e1000elayout=2
+    elif test -r "$file34"; then
         AC_MSG_RESULT([>= 3.4])
-        e1000elayout34=1
+        e1000elayout=1
     else
         AC_MSG_RESULT([before 3.4])
     fi
@@ -390,7 +432,55 @@ if test "x${enablee1000e}" = "x1"; then
 fi
 
 AC_SUBST(KERNEL_E1000E,[$kernele1000e])
-AC_SUBST(E1000E_LAYOUT_3_4, [$e1000elayout34])
+AC_SUBST(E1000E_LAYOUT, [$e1000elayout])
+
+#------------------------------------------------------------------------------
+# igb driver
+#------------------------------------------------------------------------------
+
+AC_ARG_ENABLE([igb],
+    AS_HELP_STRING([--enable-igb],
+                   [Enable igb driver]),
+    [
+        case "${enableval}" in
+            yes) enableigb=1
+                ;;
+            no) enableigb=0
+                ;;
+            *) AC_MSG_ERROR([Invalid value for --enable-igb])
+                ;;
+        esac
+    ],
+    [enableigb=0] # disabled by default
+)
+
+AM_CONDITIONAL(ENABLE_IGB, test "x$enableigb" = "x1")
+AC_SUBST(ENABLE_IGB,[$enableigb])
+
+AC_ARG_WITH([igb-kernel],
+    AC_HELP_STRING(
+        [--with-igb-kernel=<X.Y.Z>],
+        [igb kernel (only if differing)]
+    ),
+    [
+        kerneligb=[$withval]
+    ],
+    [
+        kerneligb=$linuxversion
+    ]
+)
+
+if test "x${enableigb}" = "x1"; then
+    AC_MSG_CHECKING([for kernel for igb driver])
+
+    if test ! -f "${srcdir}/devices/igb/igb_main-${kerneligb}-orig.c"; then
+        AC_MSG_ERROR([kernel $kerneligb not available for igb driver!])
+    fi
+
+    AC_MSG_RESULT([$kerneligb])
+fi
+
+AC_SUBST(KERNEL_IGB,[$kerneligb])
 
 #------------------------------------------------------------------------------
 # r8169 driver
@@ -446,6 +536,37 @@ if test "x${enable_r8169}" = "x1"; then
 fi
 
 AC_SUBST(KERNEL_R8169,[$kernel_r8169])
+
+#------------------------------------------------------------------------------
+# CCAT driver
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([whether to build the CCAT driver])
+
+AC_ARG_ENABLE([ccat],
+    AS_HELP_STRING([--enable-ccat],
+                   [Enable CCAT driver]),
+    [
+        case "${enableval}" in
+            yes) enableccat=1
+                ;;
+            no) enableccat=0
+                ;;
+            *) AC_MSG_ERROR([Invalid value for --enable-ccat])
+                ;;
+        esac
+    ],
+    [enableccat=0] # disabled by default
+)
+
+if test "x${enableccat}" = "x1"; then
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
+fi
+
+AM_CONDITIONAL(ENABLE_CCAT, test "x$enableccat" = "x1")
+AC_SUBST(ENABLE_CCAT,[$enableccat])
 
 #------------------------------------------------------------------------------
 # RTAI path (optional)
@@ -910,7 +1031,7 @@ AC_MSG_CHECKING([whether to assign the SII to PDI])
 
 AC_ARG_ENABLE([sii-assign],
     AS_HELP_STRING([--enable-sii-assign],
-                   [Enable SII assignment to PDI (default: no)]),
+                   [Enable SII assignment to PDI (default: yes)]),
     [
         case "${enableval}" in
             yes) siiassign=1
@@ -921,7 +1042,7 @@ AC_ARG_ENABLE([sii-assign],
                 ;;
         esac
     ],
-    [siiassign=0]
+    [siiassign=1]
 )
 
 if test "x${siiassign}" = "x1"; then
@@ -932,6 +1053,64 @@ else
 fi
 
 #------------------------------------------------------------------------------
+# syslog output in realtime context
+#------------------------------------------------------------------------------
+
+AC_MSG_CHECKING([whether to syslog in realtime context])
+
+AC_ARG_ENABLE([rt-syslog],
+    AS_HELP_STRING([--enable-rt-syslog],
+                   [Enable RT syslog (default: yes)]),
+    [
+        case "${enableval}" in
+            yes) rtsyslog=1
+                ;;
+            no) rtsyslog=0
+                ;;
+            *) AC_MSG_ERROR([Invalid value for --enable-rt-syslog])
+                ;;
+        esac
+    ],
+    [rtsyslog=1]
+)
+
+if test "x${rtsyslog}" = "x1"; then
+    AC_DEFINE([EC_RT_SYSLOG], [1], [Output to syslog in RT context])
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
+fi
+
+#------------------------------------------------------------------------------
+# systemd service support
+#------------------------------------------------------------------------------
+
+AC_ARG_WITH([systemdsystemunitdir],
+    AS_HELP_STRING([--with-systemdsystemunitdir=DIR],
+                   [Directory for systemd service files]),
+    ,
+    [with_systemdsystemunitdir=auto]
+)
+
+case "${with_systemdsystemunitdir}" in
+    yes)
+        with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
+        if test "x$with_systemdsystemunitdir" = "x"; then
+            AC_MSG_ERROR([systemd support requested but pkg-config unable to query systemd package])
+        fi
+        ;;
+    no)
+        with_systemdsystemunitdir=
+        ;;
+    auto)
+        with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)
+        ;;
+esac
+
+AM_CONDITIONAL(HAVE_SYSTEMD, test "x$with_systemdsystemunitdir" != "x")
+AC_SUBST(systemdsystemunitdir,[$with_systemdsystemunitdir])
+
+#------------------------------------------------------------------------------
 
 AC_CONFIG_FILES([
         Doxyfile
@@ -939,10 +1118,14 @@ AC_CONFIG_FILES([
         Makefile
         devices/Kbuild
         devices/Makefile
+        devices/ccat/Kbuild
+        devices/ccat/Makefile
         devices/e1000/Kbuild
         devices/e1000/Makefile
         devices/e1000e/Kbuild
         devices/e1000e/Makefile
+        devices/igb/Kbuild
+        devices/igb/Makefile
         ethercat.spec
         examples/Kbuild
         examples/Makefile
@@ -962,12 +1145,10 @@ AC_CONFIG_FILES([
         examples/xenomai_posix/Makefile
         include/Makefile
         lib/Makefile
-        m4/Makefile
+        lib/libethercat.pc
         master/Kbuild
         master/Makefile
         script/Makefile
-        script/ethercat.service
-        script/ethercatctl
         script/init.d/Makefile
         script/init.d/ethercat
         script/sysconfig/Makefile

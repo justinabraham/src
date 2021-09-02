@@ -1,6 +1,0 @@
-libethercat_la-liberror.lo: liberror.c /usr/include/stdc-predef.h \
- liberror.h
-
-/usr/include/stdc-predef.h:
-
-liberror.h:

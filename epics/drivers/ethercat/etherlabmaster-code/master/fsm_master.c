@@ -62,6 +62,7 @@ void ec_fsm_master_state_dc_measure_delays(ec_fsm_master_t *);
 void ec_fsm_master_state_scan_slave(ec_fsm_master_t *);
 void ec_fsm_master_state_dc_read_offset(ec_fsm_master_t *);
 void ec_fsm_master_state_dc_write_offset(ec_fsm_master_t *);
+void ec_fsm_master_state_assign_sii(ec_fsm_master_t *);
 void ec_fsm_master_state_write_sii(ec_fsm_master_t *);
 void ec_fsm_master_state_sdo_dictionary(ec_fsm_master_t *);
 void ec_fsm_master_state_sdo_request(ec_fsm_master_t *);
@@ -198,10 +199,51 @@ void ec_fsm_master_state_start(
         ec_fsm_master_t *fsm /**< Master state machine. */
         )
 {
+    ec_master_t *master = fsm->master;
+
     fsm->idle = 1;
+
+    // check for emergency requests
+    if (!list_empty(&master->emerg_reg_requests)) {
+        ec_reg_request_t *request;
+
+        // get first request
+        request = list_entry(master->emerg_reg_requests.next,
+                ec_reg_request_t, list);
+        list_del_init(&request->list); // dequeue
+        request->state = EC_INT_REQUEST_BUSY;
+
+        if (request->transfer_size > fsm->datagram->mem_size) {
+            EC_MASTER_ERR(master, "Emergency request data too large!\n");
+            request->state = EC_INT_REQUEST_FAILURE;
+            wake_up_all(&master->request_queue);
+            fsm->state(fsm); // continue
+            return;
+        }
+
+        if (request->dir != EC_DIR_OUTPUT) {
+            EC_MASTER_ERR(master, "Emergency requests must be"
+                    " write requests!\n");
+            request->state = EC_INT_REQUEST_FAILURE;
+            wake_up_all(&master->request_queue);
+            fsm->state(fsm); // continue
+            return;
+        }
+
+        EC_MASTER_DBG(master, 1, "Writing emergency register request...\n");
+        ec_datagram_apwr(fsm->datagram, request->ring_position,
+                request->address, request->transfer_size);
+        memcpy(fsm->datagram->data, request->data, request->transfer_size);
+        fsm->datagram->device_index = EC_DEVICE_MAIN;
+        request->state = EC_INT_REQUEST_SUCCESS;
+        wake_up_all(&master->request_queue);
+        return;
+    }
+
     ec_datagram_brd(fsm->datagram, 0x0130, 2);
     ec_datagram_zero(fsm->datagram);
     fsm->datagram->device_index = fsm->dev_idx;
+    fsm->retries = EC_FSM_RETRIES;
     fsm->state = ec_fsm_master_state_broadcast;
 }
 
@@ -219,6 +261,10 @@ void ec_fsm_master_state_broadcast(
     unsigned int i, size;
     ec_slave_t *slave;
     ec_master_t *master = fsm->master;
+
+    if (datagram->state == EC_DATAGRAM_TIMED_OUT && fsm->retries--) {
+        return;
+    }
 
     // bus topology change?
     if (datagram->working_counter != fsm->slaves_responding[fsm->dev_idx]) {
@@ -394,6 +440,9 @@ int ec_fsm_master_action_process_sii(
 {
     ec_master_t *master = fsm->master;
     ec_sii_write_request_t *request;
+    ec_slave_config_t *config;
+    ec_flag_t *flag;
+    int assign_to_pdi;
 
     // search the first request to be processed
     while (1) {
@@ -405,6 +454,27 @@ int ec_fsm_master_action_process_sii(
                 ec_sii_write_request_t, list);
         list_del_init(&request->list); // dequeue
         request->state = EC_INT_REQUEST_BUSY;
+
+        assign_to_pdi = 0;
+        config = request->slave->config;
+        if (config) {
+            flag = ec_slave_config_find_flag(config, "AssignToPdi");
+            if (flag) {
+                assign_to_pdi = flag->value;
+            }
+        }
+
+        if (assign_to_pdi) {
+            fsm->sii_request = request;
+            EC_SLAVE_DBG(request->slave, 1,
+                    "Assigning SII back to EtherCAT.\n");
+            ec_datagram_fpwr(fsm->datagram, request->slave->station_address,
+                    0x0500, 0x01);
+            EC_WRITE_U8(fsm->datagram->data, 0x00); // EtherCAT
+            fsm->retries = EC_FSM_RETRIES;
+            fsm->state = ec_fsm_master_state_assign_sii;
+            return 1;
+        }
 
         // found pending SII write operation. execute it!
         EC_SLAVE_DBG(request->slave, 1, "Writing SII data...\n");
@@ -920,7 +990,7 @@ void ec_fsm_master_enter_write_system_times(
 {
     ec_master_t *master = fsm->master;
 
-    if (master->has_app_time) {
+    if (master->dc_ref_time) {
 
         while (fsm->slave < master->slaves + master->slave_count) {
             if (!fsm->slave->base_dc_supported
@@ -944,7 +1014,7 @@ void ec_fsm_master_enter_write_system_times(
 
     } else {
         if (master->active) {
-            EC_MASTER_WARN(master, "No app_time received up to now,"
+            EC_MASTER_WARN(master, "No application time received up to now,"
                     " but master already active.\n");
         } else {
             EC_MASTER_DBG(master, 1, "No app_time received up to now.\n");
@@ -1124,6 +1194,43 @@ void ec_fsm_master_state_dc_write_offset(
 
     fsm->slave++;
     ec_fsm_master_enter_write_system_times(fsm);
+}
+
+/*****************************************************************************/
+
+/** Master state: ASSIGN SII.
+ */
+void ec_fsm_master_state_assign_sii(
+        ec_fsm_master_t *fsm /**< Master state machine. */
+        )
+{
+    ec_datagram_t *datagram = fsm->datagram;
+    ec_sii_write_request_t *request = fsm->sii_request;
+    ec_slave_t *slave = request->slave;
+
+    if (datagram->state == EC_DATAGRAM_TIMED_OUT && fsm->retries--)
+        return;
+
+    if (datagram->state != EC_DATAGRAM_RECEIVED) {
+        EC_SLAVE_ERR(slave, "Failed to receive SII assignment datagram: ");
+        ec_datagram_print_state(datagram);
+        goto cont;
+    }
+
+    if (datagram->working_counter != 1) {
+        EC_SLAVE_ERR(slave, "Failed to assign SII back to EtherCAT: ");
+        ec_datagram_print_wc_error(datagram);
+        goto cont;
+    }
+
+cont:
+    // found pending SII write operation. execute it!
+    EC_SLAVE_DBG(slave, 1, "Writing SII data (after assignment)...\n");
+    fsm->sii_index = 0;
+    ec_fsm_sii_write(&fsm->fsm_sii, slave, request->offset,
+            request->words, EC_FSM_SII_USE_CONFIGURED_ADDRESS);
+    fsm->state = ec_fsm_master_state_write_sii;
+    fsm->state(fsm); // execute immediately
 }
 
 /*****************************************************************************/

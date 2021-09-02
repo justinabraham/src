@@ -1,8 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
- *
- *  Copyright (C) 2006-2008  Florian Pose, Ingenieurgemeinschaft IgH
+ *  Copyright (C) 2006-2020  Florian Pose, Ingenieurgemeinschaft IgH
  *
  *  This file is part of the IgH EtherCAT Master.
  *
@@ -57,6 +55,10 @@ enum ec_soe_opcodes {
 /** Size of all SoE headers.
  */
 #define EC_SOE_SIZE 0x04
+
+/** SoE header size.
+ */
+#define EC_SOE_HEADER_SIZE (EC_MBOX_HEADER_SIZE + EC_SOE_SIZE)
 
 /** SoE response timeout [ms].
  */
@@ -200,12 +202,12 @@ void ec_fsm_soe_print_error(ec_fsm_soe_t *fsm /**< Finite state machine */)
     EC_SLAVE_ERR(fsm->slave, "");
 
     if (request->dir == EC_DIR_OUTPUT) {
-        printk("Writing");
+        printk(KERN_CONT "Writing");
     } else {
-        printk("Reading");
+        printk(KERN_CONT "Reading");
     }
 
-    printk(" IDN 0x%04X failed.\n", request->idn);
+    printk(KERN_CONT " IDN 0x%04X failed.\n", request->idn);
 }
 
 /******************************************************************************
@@ -237,7 +239,7 @@ int ec_fsm_soe_prepare_read(
     EC_WRITE_U16(data + 2, request->idn);
 
     if (master->debug_level) {
-        EC_SLAVE_DBG(slave, 0, "SCC read request:\n");
+        EC_SLAVE_DBG(slave, 0, "SSC read request:\n");
         ec_print_data(data, EC_SOE_SIZE);
     }
 
@@ -434,7 +436,7 @@ void ec_fsm_soe_read_response(
     }
 
     if (master->debug_level) {
-        EC_SLAVE_DBG(slave, 0, "SCC read response:\n");
+        EC_SLAVE_DBG(slave, 0, "SSC read response:\n");
         ec_print_data(data, rec_size);
     }
 
@@ -528,20 +530,11 @@ void ec_fsm_soe_write_next_fragment(
     ec_master_t *master = slave->master;
     ec_soe_request_t *req = fsm->request;
     uint8_t incomplete, *data;
-    size_t header_size, max_fragment_size, remaining_size;
+    size_t max_fragment_size, remaining_size;
     uint16_t fragments_left;
 
-    header_size = EC_MBOX_HEADER_SIZE + EC_SOE_SIZE;
-    if (slave->configured_rx_mailbox_size <= header_size) {
-        EC_SLAVE_ERR(slave, "Mailbox size (%u) too small for SoE write.\n",
-                slave->configured_rx_mailbox_size);
-        fsm->state = ec_fsm_soe_error;
-        ec_fsm_soe_print_error(fsm);
-        return;
-    }
-
     remaining_size = req->data_size - fsm->offset;
-    max_fragment_size = slave->configured_rx_mailbox_size - header_size;
+    max_fragment_size = slave->configured_rx_mailbox_size - EC_SOE_HEADER_SIZE;
     incomplete = remaining_size > max_fragment_size;
     fsm->fragment_size = incomplete ? max_fragment_size : remaining_size;
     fragments_left = remaining_size / fsm->fragment_size - 1;
@@ -561,14 +554,13 @@ void ec_fsm_soe_write_next_fragment(
             (req->drive_no & 0x07) << 5);
     EC_WRITE_U8(data + 1, 1 << 6); // only value included
     EC_WRITE_U16(data + 2, incomplete ? fragments_left : req->idn);
-    memcpy(data + 4, req->data + fsm->offset, fsm->fragment_size);
+    memcpy(data + EC_SOE_SIZE, req->data + fsm->offset, fsm->fragment_size);
 
     if (master->debug_level) {
-        EC_SLAVE_DBG(slave, 0, "SCC write request:\n");
+        EC_SLAVE_DBG(slave, 0, "SSC write request:\n");
         ec_print_data(data, EC_SOE_SIZE + fsm->fragment_size);
     }
 
-    req->jiffies_sent = jiffies;
     fsm->state = ec_fsm_soe_write_request;
 }
 
@@ -594,9 +586,18 @@ void ec_fsm_soe_write_start(
         return;
     }
 
+    if (slave->configured_rx_mailbox_size <= EC_SOE_HEADER_SIZE) {
+        EC_SLAVE_ERR(slave, "Mailbox size (%u) too small for SoE write.\n",
+                slave->configured_rx_mailbox_size);
+        fsm->state = ec_fsm_soe_error;
+        ec_fsm_soe_print_error(fsm);
+        return;
+    }
+
     fsm->offset = 0;
     fsm->retries = EC_FSM_RETRIES;
     ec_fsm_soe_write_next_fragment(fsm, datagram);
+    req->jiffies_sent = jiffies;
 }
 
 /*****************************************************************************/
@@ -642,11 +643,21 @@ void ec_fsm_soe_write_request(
         return;
     }
 
-    fsm->jiffies_start = fsm->datagram->jiffies_sent;
+    // fragment successfully sent
+    fsm->offset += fsm->fragment_size;
 
-    ec_slave_mbox_prepare_check(slave, datagram); // can not fail.
-    fsm->retries = EC_FSM_RETRIES;
-    fsm->state = ec_fsm_soe_write_check;
+    if (fsm->offset < fsm->request->data_size) {
+        // next fragment
+        fsm->retries = EC_FSM_RETRIES;
+        ec_fsm_soe_write_next_fragment(fsm, datagram);
+        fsm->request->jiffies_sent = jiffies;
+    } else {
+        // all fragments sent; query response
+        fsm->jiffies_start = fsm->datagram->jiffies_sent;
+        ec_slave_mbox_prepare_check(slave, datagram); // can not fail.
+        fsm->retries = EC_FSM_RETRIES;
+        fsm->state = ec_fsm_soe_write_check;
+    }
 }
 
 /*****************************************************************************/
@@ -749,7 +760,7 @@ void ec_fsm_soe_write_response(
     }
 
     if (master->debug_level) {
-        EC_SLAVE_DBG(slave, 0, "SCC write response:\n");
+        EC_SLAVE_DBG(slave, 0, "SSC write response:\n");
         ec_print_data(data, rec_size);
     }
 
@@ -804,17 +815,8 @@ void ec_fsm_soe_write_response(
         ec_print_data(data, rec_size);
         ec_fsm_soe_print_error(fsm);
         fsm->state = ec_fsm_soe_error;
-        return;
     } else {
         req->error_code = 0x0000;
-    }
-
-    fsm->offset += fsm->fragment_size;
-
-    if (fsm->offset < req->data_size) {
-        fsm->retries = EC_FSM_RETRIES;
-        ec_fsm_soe_write_next_fragment(fsm, datagram);
-    } else {
         fsm->state = ec_fsm_soe_end; // success
     }
 }

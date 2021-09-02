@@ -703,6 +703,11 @@ void ec_fsm_slave_config_state_boot_preop(
         )
 {
     ec_slave_t *slave = fsm->slave;
+#ifdef EC_SII_ASSIGN
+    int assign_to_pdi;
+    ec_slave_config_t *config;
+    ec_flag_t *flag;
+#endif
 
     if (ec_fsm_change_exec(fsm->fsm_change)) {
         return;
@@ -722,12 +727,33 @@ void ec_fsm_slave_config_state_boot_preop(
             slave->requested_state != EC_SLAVE_STATE_BOOT ? "PREOP" : "BOOT");
 
 #ifdef EC_SII_ASSIGN
-    EC_SLAVE_DBG(slave, 1, "Assigning SII access back to EtherCAT.\n");
+    assign_to_pdi = 0;
+    config = fsm->slave->config;
+    if (config) {
+        flag = ec_slave_config_find_flag(config, "AssignToPdi");
+        if (flag) {
+            assign_to_pdi = flag->value;
+        }
+    }
 
-    ec_datagram_fpwr(fsm->datagram, slave->station_address, 0x0500, 0x01);
-    EC_WRITE_U8(fsm->datagram->data, 0x00); // EtherCAT
-    fsm->retries = EC_FSM_RETRIES;
-    fsm->state = ec_fsm_slave_config_state_assign_ethercat;
+    if (assign_to_pdi) {
+        EC_SLAVE_DBG(slave, 1, "Skipping SII assignment back to EtherCAT.\n");
+        if (slave->current_state == slave->requested_state) {
+            fsm->state = ec_fsm_slave_config_state_end; // successful
+            EC_SLAVE_DBG(slave, 1, "Finished configuration.\n");
+            return;
+        }
+
+        ec_fsm_slave_config_enter_sdo_conf(fsm);
+    }
+    else {
+        EC_SLAVE_DBG(slave, 1, "Assigning SII access back to EtherCAT.\n");
+
+        ec_datagram_fpwr(fsm->datagram, slave->station_address, 0x0500, 0x01);
+        EC_WRITE_U8(fsm->datagram->data, 0x00); // EtherCAT
+        fsm->retries = EC_FSM_RETRIES;
+        fsm->state = ec_fsm_slave_config_state_assign_ethercat;
+    }
 #else
     if (slave->current_state == slave->requested_state) {
         fsm->state = ec_fsm_slave_config_state_end; // successful
@@ -1365,6 +1391,7 @@ void ec_fsm_slave_config_state_dc_sync_check(
     uint32_t abs_sync_diff;
     unsigned long diff_ms;
     ec_sync_signal_t *sync0 = &config->dc_sync[0];
+    ec_sync_signal_t *sync1 = &config->dc_sync[1];
     u64 start_time;
 
     if (!config) { // config removed in the meantime
@@ -1412,30 +1439,28 @@ void ec_fsm_slave_config_state_dc_sync_check(
                 abs_sync_diff, diff_ms);
     }
 
-    // set DC start time
+    // set DC start time (roughly in the future, not in-phase)
     start_time = master->app_time + EC_DC_START_OFFSET; // now + X ns
-    // FIXME use slave's local system time here?
 
     if (sync0->cycle_time) {
         // find correct phase
-        if (master->has_app_time) {
+        if (master->dc_ref_time) {
             u64 diff, start;
-            u32 remainder;
+            u32 remainder, cycle;
 
-            diff = start_time - master->app_start_time;
-            remainder = do_div(diff, sync0->cycle_time);
+            diff = start_time - master->dc_ref_time;
+            cycle = sync0->cycle_time + sync1->cycle_time;
+            remainder = do_div(diff, cycle);
 
-            start = start_time +
-                sync0->cycle_time - remainder + sync0->shift_time;
+            start = start_time + cycle - remainder + sync0->shift_time;
 
-            EC_SLAVE_DBG(slave, 1, "app_start_time=%llu\n",
-                    master->app_start_time);
-            EC_SLAVE_DBG(slave, 1, "      app_time=%llu\n", master->app_time);
-            EC_SLAVE_DBG(slave, 1, "    start_time=%llu\n", start_time);
-            EC_SLAVE_DBG(slave, 1, "    cycle_time=%u\n", sync0->cycle_time);
-            EC_SLAVE_DBG(slave, 1, "    shift_time=%i\n", sync0->shift_time);
-            EC_SLAVE_DBG(slave, 1, "     remainder=%u\n", remainder);
-            EC_SLAVE_DBG(slave, 1, "         start=%llu\n", start);
+            EC_SLAVE_DBG(slave, 1, "   ref_time=%llu\n", master->dc_ref_time);
+            EC_SLAVE_DBG(slave, 1, "   app_time=%llu\n", master->app_time);
+            EC_SLAVE_DBG(slave, 1, " start_time=%llu\n", start_time);
+            EC_SLAVE_DBG(slave, 1, "      cycle=%u\n", cycle);
+            EC_SLAVE_DBG(slave, 1, " shift_time=%i\n", sync0->shift_time);
+            EC_SLAVE_DBG(slave, 1, "  remainder=%u\n", remainder);
+            EC_SLAVE_DBG(slave, 1, "       start=%llu\n", start);
             start_time = start;
         } else {
             EC_SLAVE_WARN(slave, "No application time supplied."

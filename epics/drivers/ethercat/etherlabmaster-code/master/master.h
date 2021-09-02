@@ -236,8 +236,7 @@ struct ec_master {
     struct list_head domains; /**< List of domains. */
 
     u64 app_time; /**< Time of the last ecrt_master_sync() call. */
-    u64 app_start_time; /**< Application start time. */
-    u8 has_app_time; /**< Application time is valid. */
+    u64 dc_ref_time; /**< Common reference timestamp for DC start times. */
     ec_datagram_t ref_sync_datagram; /**< Datagram used for synchronizing the
                                        reference clock to the master clock. */
     ec_datagram_t sync_datagram; /**< Datagram used for DC drift
@@ -305,6 +304,8 @@ struct ec_master {
     void *app_cb_data; /**< Application callback data. */
 
     struct list_head sii_requests; /**< SII write requests. */
+    struct list_head emerg_reg_requests; /**< Emergency register access
+                                           requests. */
 
     wait_queue_head_t request_queue; /**< Wait queue for external requests
                                        from user space. */
@@ -341,7 +342,8 @@ void ec_master_eoe_stop(ec_master_t *);
 #endif
 
 // datagram IO
-void ec_master_receive_datagrams(ec_master_t *, const uint8_t *, size_t);
+void ec_master_receive_datagrams(ec_master_t *, ec_device_t *,
+        const uint8_t *, size_t);
 void ec_master_queue_datagram(ec_master_t *, ec_datagram_t *);
 void ec_master_queue_datagram_ext(ec_master_t *, ec_datagram_t *);
 

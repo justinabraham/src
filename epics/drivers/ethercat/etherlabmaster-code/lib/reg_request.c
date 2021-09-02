@@ -1,8 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
- *
- *  Copyright (C) 2012  Florian Pose, Ingenieurgemeinschaft IgH
+ *  Copyright (C) 2012-2019  Florian Pose, Ingenieurgemeinschaft IgH
  *
  *  This file is part of the IgH EtherCAT master userspace library.
  *
@@ -41,7 +39,6 @@
 #include "reg_request.h"
 #include "slave_config.h"
 #include "master.h"
-#include "liberror.h"
 
 /*****************************************************************************/
 
@@ -49,6 +46,7 @@ void ec_reg_request_clear(ec_reg_request_t *reg)
 {
     if (reg->data) {
         free(reg->data);
+        reg->data = NULL;
     }
 }
 
@@ -73,8 +71,7 @@ ec_request_state_t ecrt_reg_request_state(ec_reg_request_t *reg)
 
     ret = ioctl(reg->config->master->fd, EC_IOCTL_REG_REQUEST_STATE, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRREQREQUESTSTATE;
-        ERRPRINTF("Failed to get register request state: %s\n",
+        fprintf(stderr, "Failed to get register request state: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return EC_REQUEST_ERROR;
     }
@@ -87,8 +84,7 @@ ec_request_state_t ecrt_reg_request_state(ec_reg_request_t *reg)
         ret = ioctl(reg->config->master->fd,
                 EC_IOCTL_REG_REQUEST_DATA, &io);
         if (EC_IOCTL_IS_ERROR(ret)) {
-            ecrt_errcode = ECRT_ERRREQREQUESTSTATE1;
-            ERRPRINTF("Failed to get register data: %s\n",
+            fprintf(stderr, "Failed to get register data: %s\n",
                     strerror(EC_IOCTL_ERRNO(ret)));
             return EC_REQUEST_ERROR;
         }
@@ -113,8 +109,7 @@ void ecrt_reg_request_write(ec_reg_request_t *reg, uint16_t address,
 
     ret = ioctl(reg->config->master->fd, EC_IOCTL_REG_REQUEST_WRITE, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRREQREQUESTSIZE;
-        ERRPRINTF("Failed to command an register write operation: %s\n",
+        fprintf(stderr, "Failed to command an register write operation: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -134,8 +129,7 @@ void ecrt_reg_request_read(ec_reg_request_t *reg, uint16_t address,
 
     ret = ioctl(reg->config->master->fd, EC_IOCTL_REG_REQUEST_READ, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRREQREQUESTREAD;
-        ERRPRINTF("Failed to command an register read operation: %s\n",
+        fprintf(stderr, "Failed to command an register read operation: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }

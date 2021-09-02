@@ -1,8 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
- *
- *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
+ *  Copyright (C) 2006-2019  Florian Pose, Ingenieurgemeinschaft IgH
  *
  *  This file is part of the IgH EtherCAT master userspace library.
  *
@@ -40,7 +38,6 @@
 #include "reg_request.h"
 #include "voe_handler.h"
 #include "master.h"
-#include "liberror.h"
 
 /*****************************************************************************/
 
@@ -54,22 +51,28 @@ void ec_slave_config_clear(ec_slave_config_t *sc)
     while (r) {
         next_r = r->next;
         ec_sdo_request_clear(r);
+        free(r);
         r = next_r;
     }
+    sc->first_sdo_request = NULL;
 
     e = sc->first_reg_request;
     while (e) {
         next_e = e->next;
         ec_reg_request_clear(e);
+        free(e);
         e = next_e;
     }
+    sc->first_reg_request = NULL;
 
     v = sc->first_voe_handler;
     while (v) {
         next_v = v->next;
         ec_voe_handler_clear(v);
+        free(v);
         v = next_v;
     }
+    sc->first_voe_handler = NULL;
 }
 
 /*****************************************************************************/
@@ -91,8 +94,7 @@ int ecrt_slave_config_sync_manager(ec_slave_config_t *sc, uint8_t sync_index,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_SYNC, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGSYNCMANAGER;
-        ERRPRINTF("Failed to config sync manager: %s\n",
+        fprintf(stderr, "Failed to config sync manager: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -115,8 +117,7 @@ void ecrt_slave_config_watchdog(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_WATCHDOG, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGWATCHDOG;
-        ERRPRINTF("Failed to config watchdog: %s\n",
+        fprintf(stderr, "Failed to config watchdog: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -135,8 +136,7 @@ int ecrt_slave_config_pdo_assign_add(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_ADD_PDO, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGPDOASSIGNADD;
-        ERRPRINTF("Failed to add PDO: %s\n",
+        fprintf(stderr, "Failed to add PDO: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -157,8 +157,7 @@ void ecrt_slave_config_pdo_assign_clear(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_CLEAR_PDOS, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGPDOASSIGNCLEAR;
-        ERRPRINTF("Failed to clear PDOs: %s\n",
+        fprintf(stderr, "Failed to clear PDOs: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -180,8 +179,7 @@ int ecrt_slave_config_pdo_mapping_add(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_ADD_ENTRY, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGPDOMAPPINGADD;
-        ERRPRINTF("Failed to add PDO entry: %s\n",
+        fprintf(stderr, "Failed to add PDO entry: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -202,8 +200,7 @@ void ecrt_slave_config_pdo_mapping_clear(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_CLEAR_ENTRIES, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGPDOMAPPINGCLEAR;
-        ERRPRINTF("Failed to clear PDO entries: %s\n",
+        fprintf(stderr, "Failed to clear PDO entries: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -229,8 +226,7 @@ int ecrt_slave_config_pdos(ec_slave_config_t *sc,
             break;
 
         if (sync_info->index >= EC_MAX_SYNC_MANAGERS) {
-            ecrt_errcode = ECRT_ERRSLAVECFGPDOS;
-            ERRPRINTF("Invalid sync manager index %u!\n",
+            fprintf(stderr, "Invalid sync manager index %u!\n",
                     sync_info->index);
             return -ENOENT;
         }
@@ -240,8 +236,9 @@ int ecrt_slave_config_pdos(ec_slave_config_t *sc,
         if (ret)
             return ret;
 
+        ecrt_slave_config_pdo_assign_clear(sc, sync_info->index);
+
         if (sync_info->n_pdos && sync_info->pdos) {
-            ecrt_slave_config_pdo_assign_clear(sc, sync_info->index);
 
             for (j = 0; j < sync_info->n_pdos; j++) {
                 pdo_info = &sync_info->pdos[j];
@@ -251,9 +248,9 @@ int ecrt_slave_config_pdos(ec_slave_config_t *sc,
                 if (ret)
                     return ret;
 
-                if (pdo_info->n_entries && pdo_info->entries) {
-                    ecrt_slave_config_pdo_mapping_clear(sc, pdo_info->index);
+                ecrt_slave_config_pdo_mapping_clear(sc, pdo_info->index);
 
+                if (pdo_info->n_entries && pdo_info->entries) {
                     for (k = 0; k < pdo_info->n_entries; k++) {
                         entry_info = &pdo_info->entries[k];
 
@@ -292,8 +289,7 @@ int ecrt_slave_config_reg_pdo_entry(
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_REG_PDO_ENTRY, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGREGPDOENTRY;
-        ERRPRINTF("Failed to register PDO entry: %s\n",
+        fprintf(stderr, "Failed to register PDO entry: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -302,8 +298,7 @@ int ecrt_slave_config_reg_pdo_entry(
         *bit_position = data.bit_position;
     } else {
         if (data.bit_position) {
-            ecrt_errcode = ECRT_ERRSLAVECFGREGPDOENTRY1;
-            ERRPRINTF("PDO entry 0x%04X:%02X does not byte-align "
+            fprintf(stderr, "PDO entry 0x%04X:%02X does not byte-align "
                     "in config %u:%u.\n", index, subindex,
                     sc->alias, sc->position);
             return -EFAULT;
@@ -335,8 +330,7 @@ int ecrt_slave_config_reg_pdo_entry_pos(
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_REG_PDO_POS, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGREGPDOENTRYPOS;
-        ERRPRINTF("Failed to register PDO entry: %s\n",
+        fprintf(stderr, "Failed to register PDO entry: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -345,8 +339,7 @@ int ecrt_slave_config_reg_pdo_entry_pos(
         *bit_position = io.bit_position;
     } else {
         if (io.bit_position) {
-            ecrt_errcode = ECRT_ERRSLAVECFGREGPDOENTRYPOS1;
-            ERRPRINTF("PDO entry %u/%u/%u does not byte-align "
+            fprintf(stderr, "PDO entry %u/%u/%u does not byte-align "
                     "in config %u:%u.\n", sync_index, pdo_pos, entry_pos,
                     sc->alias, sc->position);
             return -EFAULT;
@@ -374,8 +367,7 @@ void ecrt_slave_config_dc(ec_slave_config_t *sc, uint16_t assign_activate,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_DC, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGDC;
-        ERRPRINTF("Failed to set DC parameters: %s\n",
+        fprintf(stderr, "Failed to set DC parameters: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -397,8 +389,7 @@ int ecrt_slave_config_sdo(ec_slave_config_t *sc, uint16_t index,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_SDO, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGSDO;
-        ERRPRINTF("Failed to configure SDO: %s\n",
+        fprintf(stderr, "Failed to configure SDO: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -423,8 +414,7 @@ int ecrt_slave_config_complete_sdo(ec_slave_config_t *sc, uint16_t index,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_SDO, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCOMPLETESDO;
-        ERRPRINTF("Failed to configure SDO: %s\n",
+        fprintf(stderr, "Failed to configure SDO: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -477,8 +467,7 @@ int ecrt_slave_config_emerg_size(ec_slave_config_t *sc, size_t elements)
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_EMERG_SIZE, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGEMERGSIZE;
-        ERRPRINTF("Failed to set emergency ring size: %s\n",
+        fprintf(stderr, "Failed to set emergency ring size: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -499,8 +488,7 @@ int ecrt_slave_config_emerg_pop(ec_slave_config_t *sc, uint8_t *target)
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_EMERG_POP, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
         if (EC_IOCTL_ERRNO(ret) != ENOENT) {
-            ecrt_errcode = ECRT_ERRSLAVECFGEMERGPOP;
-            ERRPRINTF("Failed to get emergency message: %s\n",
+            fprintf(stderr, "Failed to get emergency message: %s\n",
                     strerror(EC_IOCTL_ERRNO(ret)));
         }
         return -EC_IOCTL_ERRNO(ret);
@@ -520,8 +508,7 @@ int ecrt_slave_config_emerg_clear(ec_slave_config_t *sc)
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_EMERG_CLEAR, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGEMERGCLEAR;
-        ERRPRINTF("Failed to clear emergency ring: %s\n",
+        fprintf(stderr, "Failed to clear emergency ring: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -540,8 +527,7 @@ int ecrt_slave_config_emerg_overruns(ec_slave_config_t *sc)
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_EMERG_OVERRUNS, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGEMERGOVERRUNS;
-        ERRPRINTF("Failed to get emergency overruns: %s\n",
+        fprintf(stderr, "Failed to get emergency overruns: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }
@@ -576,16 +562,14 @@ ec_sdo_request_t *ecrt_slave_config_create_sdo_request(ec_slave_config_t *sc,
 
     req = malloc(sizeof(ec_sdo_request_t));
     if (!req) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCREATESDOREQUEST;
-        ERRPRINTF("Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate memory.\n");
         return 0;
     }
 
     if (size) {
         req->data = malloc(size);
         if (!req->data) {
-            ecrt_errcode = ECRT_ERRSLAVECFGCREATESDOREQUEST1;
-            ERRPRINTF("Failed to allocate %zu bytes of SDO data"
+            fprintf(stderr, "Failed to allocate %zu bytes of SDO data"
                     " memory.\n", size);
             free(req);
             return 0;
@@ -601,8 +585,7 @@ ec_sdo_request_t *ecrt_slave_config_create_sdo_request(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_SDO_REQUEST, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCREATESDOREQUEST2;
-        ERRPRINTF("Failed to create SDO request: %s\n",
+        fprintf(stderr, "Failed to create SDO request: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         ec_sdo_request_clear(req);
         free(req);
@@ -649,16 +632,14 @@ ec_reg_request_t *ecrt_slave_config_create_reg_request(ec_slave_config_t *sc,
 
     reg = malloc(sizeof(ec_reg_request_t));
     if (!reg) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCREATEREGREQUEST;
-        ERRPRINTF("Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate memory.\n");
         return NULL;
     }
 
     if (size) {
         reg->data = malloc(size);
         if (!reg->data) {
-            ecrt_errcode = ECRT_ERRSLAVECFGCREATEREGREQUEST1;
-            ERRPRINTF("Failed to allocate %zu bytes of register data"
+            fprintf(stderr, "Failed to allocate %zu bytes of register data"
                     " memory.\n", size);
             free(reg);
             return 0;
@@ -672,8 +653,7 @@ ec_reg_request_t *ecrt_slave_config_create_reg_request(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_REG_REQUEST, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCREATEREGREQUEST2;
-        ERRPRINTF("Failed to create register request: %s\n",
+        fprintf(stderr, "Failed to create register request: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         ec_reg_request_clear(reg);
         free(reg);
@@ -717,16 +697,14 @@ ec_voe_handler_t *ecrt_slave_config_create_voe_handler(ec_slave_config_t *sc,
 
     voe = malloc(sizeof(ec_voe_handler_t));
     if (!voe) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCREATEVOEHANDLER;
-        ERRPRINTF("Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate memory.\n");
         return 0;
     }
 
     if (size) {
         voe->data = malloc(size);
         if (!voe->data) {
-            ecrt_errcode = ECRT_ERRSLAVECFGCREATEVOEHANDLER1;
-            ERRPRINTF("Failed to allocate %zu bytes of VoE data"
+            fprintf(stderr, "Failed to allocate %zu bytes of VoE data"
                     " memory.\n", size);
             free(voe);
             return 0;
@@ -740,8 +718,7 @@ ec_voe_handler_t *ecrt_slave_config_create_voe_handler(ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_VOE, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGCREATEVOEHANDLER2;
-        ERRPRINTF("Failed to create VoE handler: %s\n",
+        fprintf(stderr, "Failed to create VoE handler: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         ec_voe_handler_clear(voe);
         free(voe);
@@ -772,8 +749,7 @@ void ecrt_slave_config_state(const ec_slave_config_t *sc,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_STATE, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGSTATE;
-        ERRPRINTF("Failed to get slave configuration state: %s\n",
+        fprintf(stderr, "Failed to get slave configuration state: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -795,8 +771,41 @@ int ecrt_slave_config_idn(ec_slave_config_t *sc, uint8_t drive_no,
 
     ret = ioctl(sc->master->fd, EC_IOCTL_SC_IDN, &io);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRSLAVECFGIDN;
-        ERRPRINTF("Failed to configure IDN: %s\n",
+        fprintf(stderr, "Failed to configure IDN: %s\n",
+                strerror(EC_IOCTL_ERRNO(ret)));
+        return -EC_IOCTL_ERRNO(ret);
+    }
+
+    return 0;
+}
+
+/*****************************************************************************/
+
+int ecrt_slave_config_flag(ec_slave_config_t *sc, const char *key,
+        int32_t value)
+{
+    ec_ioctl_sc_flag_t io;
+    int ret;
+
+    io.config_index = sc->index;
+    io.key_size = strlen(key);
+    if (io.key_size <= 0) {
+        return -EINVAL;
+    }
+
+    io.key = malloc(io.key_size + 1);
+    if (!io.key) {
+        fprintf(stderr, "Failed to allocate %zu bytes of flag key memory.\n",
+                io.key_size);
+        return -ENOMEM;
+    }
+
+    strcpy(io.key, key);
+    io.value = value;
+
+    ret = ioctl(sc->master->fd, EC_IOCTL_SC_FLAG, &io);
+    if (EC_IOCTL_IS_ERROR(ret)) {
+        fprintf(stderr, "Failed to configure feature flag: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return -EC_IOCTL_ERRNO(ret);
     }

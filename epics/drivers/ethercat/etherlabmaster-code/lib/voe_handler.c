@@ -1,8 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
- *
- *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
+ *  Copyright (C) 2006-2019  Florian Pose, Ingenieurgemeinschaft IgH
  *
  *  This file is part of the IgH EtherCAT master userspace library.
  *
@@ -42,7 +40,6 @@
 #include "voe_handler.h"
 #include "slave_config.h"
 #include "master.h"
-#include "liberror.h"
 
 /*****************************************************************************/
 
@@ -50,6 +47,7 @@ void ec_voe_handler_clear(ec_voe_handler_t *voe)
 {
     if (voe->data) {
         free(voe->data);
+        voe->data = NULL;
     }
 }
 
@@ -68,8 +66,7 @@ void ecrt_voe_handler_send_header(ec_voe_handler_t *voe, uint32_t vendor_id,
 
     ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_SEND_HEADER, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-      ecrt_errcode = ECRT_ERRVOEHNDSENDHEADER;
-        ERRPRINTF("Failed to set VoE send header: %s\n",
+        fprintf(stderr, "Failed to set VoE send header: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -89,8 +86,7 @@ void ecrt_voe_handler_received_header(const ec_voe_handler_t *voe,
 
     ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_REC_HEADER, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRVOEHNDRECEIVEDHEADER;
-        ERRPRINTF("Failed to get received VoE header: %s\n",
+        fprintf(stderr, "Failed to get received VoE header: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -121,8 +117,7 @@ void ecrt_voe_handler_read(ec_voe_handler_t *voe)
 
     ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_READ, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRVOEHNDREAD;
-        ERRPRINTF("Failed to initiate VoE reading: %s\n",
+        fprintf(stderr, "Failed to initiate VoE reading: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -139,8 +134,7 @@ void ecrt_voe_handler_read_nosync(ec_voe_handler_t *voe)
 
     ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_READ_NOSYNC, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRVOEHNDREADNOSYNC;
-        ERRPRINTF("Failed to initiate VoE reading: %s\n",
+        fprintf(stderr, "Failed to initiate VoE reading: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -159,8 +153,7 @@ void ecrt_voe_handler_write(ec_voe_handler_t *voe, size_t size)
 
     ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_WRITE, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRVOEHNDWRITE;
-        ERRPRINTF("Failed to initiate VoE writing: %s\n",
+        fprintf(stderr, "Failed to initiate VoE writing: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -177,16 +170,14 @@ ec_request_state_t ecrt_voe_handler_execute(ec_voe_handler_t *voe)
 
     ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_EXEC, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERRVOEHNDEXECUTE;
-        ERRPRINTF("Failed to execute VoE handler: %s\n",
+        fprintf(stderr, "Failed to execute VoE handler: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return EC_REQUEST_ERROR;
     }
 
     if (data.size) { // new data waiting to be copied
         if (voe->mem_size < data.size) {
-            ecrt_errcode = ECRT_ERRVOEHNDEXECUTE1;
-            ERRPRINTF("Received %zu bytes do not fit info VoE data"
+            fprintf(stderr, "Received %zu bytes do not fit info VoE data"
                     " memory (%zu bytes)!\n", data.size, voe->mem_size);
             return EC_REQUEST_ERROR;
         }
@@ -195,8 +186,7 @@ ec_request_state_t ecrt_voe_handler_execute(ec_voe_handler_t *voe)
 
         ret = ioctl(voe->config->master->fd, EC_IOCTL_VOE_DATA, &data);
         if (EC_IOCTL_IS_ERROR(ret)) {
-            ecrt_errcode = ECRT_ERRVOEHNDEXECUTE2;
-            ERRPRINTF("Failed to get VoE data: %s\n",
+            fprintf(stderr, "Failed to get VoE data: %s\n",
                     strerror(EC_IOCTL_ERRNO(ret)));
             return EC_REQUEST_ERROR;
         }

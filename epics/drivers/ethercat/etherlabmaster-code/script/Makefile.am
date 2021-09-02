@@ -35,18 +35,36 @@ SUBDIRS = init.d sysconfig
 
 sbin_SCRIPTS = ethercatctl
 
-systemddir = $(libdir)/systemd/system
-systemd_DATA = ethercat.service
-
 dist_sysconf_DATA = ethercat.conf
 
-EXTRA_DIST = \
+script_templates = \
 	ethercatctl.in \
-	ethercat.service.in \
+	ethercat.service.in
+
+EXTRA_DIST = \
+	$(script_templates) \
 	ifup-eoe.sh
 
-BUILT_SOURCES = \
+CLEANFILES = \
 	ethercatctl \
 	ethercat.service
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA = ethercat.service
+endif
+
+
+# Any precious variable used inside script_templates should appear here
+expand_script = $(SED) \
+	-e 's,[@]VERSION[@],$(VERSION),g' \
+	-e 's,[@]bindir[@],$(bindir),g' \
+	-e 's,[@]sbindir[@],$(sbindir),g' \
+	-e 's,[@]sysconfdir[@],$(sysconfdir),g'
+
+ethercatctl: $(srcdir)/ethercatctl.in Makefile
+	$(expand_script) < $< > $@
+
+ethercat.service: $(srcdir)/ethercat.service.in Makefile
+	$(expand_script) < $< > $@
 
 #------------------------------------------------------------------------------

@@ -10,6 +10,7 @@ vim700: spelllang=en spell
 
 Future issues:
 
+* Improve redundancy_active doc in ecrt.h.
 • Remove fprintf() calls from user-space library (define return codes).
 • Move SII request to slave FSM.
 • Move SDO request to slave FSM.
@@ -59,6 +60,10 @@ Future issues:
     - Implement reading from stream for soe_write.
     - Output error after usage.
 * Fix bus scan hang when calling ecrt_master_deactivate().
+
+Documentation
+
+* Update FSM graphs.
 
 Smaller issues:
 

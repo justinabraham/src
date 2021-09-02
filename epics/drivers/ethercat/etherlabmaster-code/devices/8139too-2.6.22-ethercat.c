@@ -25,6 +25,8 @@
  *  EtherCAT technology and brand is only permitted in compliance with the
  *  industrial property and similar rights of Beckhoff Automation GmbH.
  *
+ *  vim: noexpandtab
+ *
  *****************************************************************************/
 
 /**
@@ -1149,9 +1151,12 @@ static int __devinit rtl8139_init_one (struct pci_dev *pdev,
 	if (rtl_chip_info[tp->chipset].flags & HasHltClk)
 		RTL_W8 (HltClk, 'H');	/* 'R' would leave the clock running. */
 
-	if (tp->ecdev && ecdev_open(tp->ecdev)) {
-		ecdev_withdraw(tp->ecdev);
-		goto err_out;
+	if (tp->ecdev) {
+		i = ecdev_open(tp->ecdev);
+		if (i) {
+			ecdev_withdraw(tp->ecdev);
+			goto err_out;
+		}
 	}
 
 	return 0;
@@ -2109,14 +2114,14 @@ no_early_rx:
 			goto out;
 		}
 
-      		if (tp->ecdev) {
- 			ecdev_receive(tp->ecdev,
- 					&rx_ring[ring_offset + 4], pkt_size);
- 			dev->last_rx = jiffies;
- 			tp->stats.rx_bytes += pkt_size;
- 			tp->stats.rx_packets++;
- 		}
- 		else {
+		if (tp->ecdev) {
+			ecdev_receive(tp->ecdev,
+					&rx_ring[ring_offset + 4], pkt_size);
+			dev->last_rx = jiffies;
+			tp->stats.rx_bytes += pkt_size;
+			tp->stats.rx_packets++;
+		}
+		else {
 
 		  /* Malloc up new buffer, compatible with net-2e. */
 		  /* Omit the four octet CRC from the length. */
@@ -2254,7 +2259,7 @@ static int rtl8139_poll(struct net_device *dev, int *budget)
 
 void ec_poll(struct net_device *dev)
 {
-    rtl8139_interrupt(0, dev);
+	rtl8139_interrupt(0, dev);
 }
 
 /* The interrupt handler does all of the Rx thread work and cleans up

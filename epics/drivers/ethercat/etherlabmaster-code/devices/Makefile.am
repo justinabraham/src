@@ -26,14 +26,13 @@
 #  industrial property and similar rights of Beckhoff Automation GmbH.
 #
 #------------------------------------------------------------------------------
+include $(top_srcdir)/Makefile.kbuild
 
 SUBDIRS = \
+	ccat \
 	e1000 \
-	e1000e
-
-DIST_SUBDIRS = \
-	e1000 \
-	e1000e
+	e1000e \
+	igb
 
 # using HEADERS to enable tags target
 noinst_HEADERS = \
@@ -77,10 +76,24 @@ noinst_HEADERS = \
 	8139too-2.6.37-orig.c \
 	8139too-3.0-ethercat.c \
 	8139too-3.0-orig.c \
+	8139too-3.10-ethercat.c \
+	8139too-3.10-orig.c \
+	8139too-3.12-ethercat.c \
+	8139too-3.12-orig.c \
+	8139too-3.14-ethercat.c \
+	8139too-3.14-orig.c \
+	8139too-3.16-ethercat.c \
+	8139too-3.16-orig.c \
 	8139too-3.2-ethercat.c \
 	8139too-3.2-orig.c \
 	8139too-3.4-ethercat.c \
 	8139too-3.4-orig.c \
+	8139too-3.6-ethercat.c \
+	8139too-3.6-orig.c \
+	8139too-3.8-ethercat.c \
+	8139too-3.8-orig.c \
+	8139too-4.4-ethercat.c \
+	8139too-4.4-orig.c \
 	e100-2.6.20-ethercat.c \
 	e100-2.6.20-orig.c \
 	e100-2.6.24-ethercat.c \
@@ -105,8 +118,22 @@ noinst_HEADERS = \
 	e100-2.6.37-orig.c \
 	e100-3.0-ethercat.c \
 	e100-3.0-orig.c \
+	e100-3.10-ethercat.c \
+	e100-3.10-orig.c \
+	e100-3.12-ethercat.c \
+	e100-3.12-orig.c \
+	e100-3.14-ethercat.c \
+	e100-3.14-orig.c \
+	e100-3.16-ethercat.c \
+	e100-3.16-orig.c \
 	e100-3.4-ethercat.c \
 	e100-3.4-orig.c \
+	e100-3.6-ethercat.c \
+	e100-3.6-orig.c \
+	e100-3.8-ethercat.c \
+	e100-3.8-orig.c \
+	e100-4.4-ethercat.c \
+	e100-4.4-orig.c \
 	ecdev.h \
 	generic.c \
 	r8169-2.6.24-ethercat.c \
@@ -129,25 +156,23 @@ noinst_HEADERS = \
 	r8169-2.6.36-orig.c \
 	r8169-2.6.37-ethercat.c \
 	r8169-2.6.37-orig.c \
+	r8169-3.10-ethercat.c \
+	r8169-3.10-orig.c \
+	r8169-3.12-ethercat.c \
+	r8169-3.12-orig.c \
+	r8169-3.14-ethercat.c \
+	r8169-3.14-orig.c \
+	r8169-3.16-ethercat.c \
+	r8169-3.16-orig.c \
 	r8169-3.2-ethercat.c \
 	r8169-3.2-orig.c \
 	r8169-3.4-ethercat.c \
-	r8169-3.4-orig.c
-
-EXTRA_DIST = \
-	Kbuild.in
-
-BUILT_SOURCES = \
-	Kbuild
-
-modules:
-	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" modules
-
-modules_install:
-	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" \
-		INSTALL_MOD_DIR="$(INSTALL_MOD_DIR)" modules_install
-
-clean-local:
-	$(MAKE) -C "$(LINUX_SOURCE_DIR)" M="@abs_srcdir@" clean
+	r8169-3.4-orig.c \
+	r8169-3.6-ethercat.c \
+	r8169-3.6-orig.c \
+	r8169-3.8-ethercat.c \
+	r8169-3.8-orig.c \
+	r8169-4.4-ethercat.c \
+	r8169-4.4-orig.c
 
 #------------------------------------------------------------------------------

@@ -25,6 +25,8 @@
  *  EtherCAT technology and brand is only permitted in compliance with the
  *  industrial property and similar rights of Beckhoff Automation GmbH.
  *
+ *  vim: noexpandtab
+ *
  *****************************************************************************/
 
 /**
@@ -1182,9 +1184,12 @@ static int __devinit rtl8139_init_one (struct pci_dev *pdev,
 	if (rtl_chip_info[tp->chipset].flags & HasHltClk)
 		RTL_W8 (HltClk, 'H');	/* 'R' would leave the clock running. */
 
-	if (tp->ecdev && ecdev_open(tp->ecdev)) {
-		ecdev_withdraw(tp->ecdev);
-		goto err_out;
+	if (tp->ecdev) {
+		i = ecdev_open(tp->ecdev);
+		if (i) {
+			ecdev_withdraw(tp->ecdev);
+			goto err_out;
+		}
 	}
 
 	return 0;
@@ -2169,11 +2174,7 @@ no_early_rx:
 
 keep_pkt:
 		if (tp->ecdev) {
-			ecdev_receive(tp->ecdev,
-					&rx_ring[ring_offset + 4], pkt_size);
-					dev->last_rx = jiffies;
-					dev->stats.rx_bytes += pkt_size;
-					dev->stats.rx_packets++;
+			ecdev_receive(tp->ecdev, &rx_ring[ring_offset + 4], pkt_size);
 		} else {
 			/* Malloc up new buffer, compatible with net-2e. */
 			/* Omit the four octet CRC from the length. */

@@ -40,7 +40,6 @@
 
 #include "ioctl.h"
 #include "master.h"
-#include "liberror.h"
 
 /*****************************************************************************/
 
@@ -78,8 +77,7 @@ ec_master_t *ecrt_open_master(unsigned int master_index)
 
     master = malloc(sizeof(ec_master_t));
     if (!master) {
-        ecrt_errcode = ECRT_ERROPENMASTER1;
-        ERRPRINTF("Failed to allocate memory.\n");
+        fprintf(stderr, "Failed to allocate memory.\n");
         return 0;
     }
 
@@ -102,23 +100,20 @@ ec_master_t *ecrt_open_master(unsigned int master_index)
     master->fd = open(path, O_RDWR);
 #endif
     if (EC_IOCTL_IS_ERROR(master->fd)) {
-        ecrt_errcode = ECRT_ERROPENMASTER2;
-        ERRPRINTF("Failed to open %s: %s\n", path,
+        fprintf(stderr, "Failed to open %s: %s\n", path,
                 strerror(EC_IOCTL_ERRNO(master->fd)));
         goto out_clear;
     }
 
     ret = ioctl(master->fd, EC_IOCTL_MODULE, &module_data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        ecrt_errcode = ECRT_ERROPENMASTER3;
-        ERRPRINTF("Failed to get module information from %s: %s\n",
+        fprintf(stderr, "Failed to get module information from %s: %s\n",
                 path, strerror(EC_IOCTL_ERRNO(ret)));
         goto out_clear;
     }
 
     if (module_data.ioctl_version_magic != EC_IOCTL_VERSION_MAGIC) {
-        ecrt_errcode = ECRT_ERROPENMASTER4;      
-        ERRPRINTF("ioctl() version magic is differing:"
+        fprintf(stderr, "ioctl() version magic is differing:"
                 " %s: %u, libethercat: %u.\n",
                 path, module_data.ioctl_version_magic,
                 EC_IOCTL_VERSION_MAGIC);
@@ -139,6 +134,36 @@ void ecrt_release_master(ec_master_t *master)
 {
     ec_master_clear(master);
     free(master);
+}
+
+/*****************************************************************************/
+
+float ecrt_read_real(const void *data)
+{
+    uint32_t raw = EC_READ_U32(data);
+    return *(float *) (const void *) &raw;
+}
+
+/*****************************************************************************/
+
+double ecrt_read_lreal(const void *data)
+{
+    uint64_t raw = EC_READ_U64(data);
+    return *(double *) (const void *) &raw;
+}
+
+/*****************************************************************************/
+
+void ecrt_write_real(void *data, float value)
+{
+    *(uint32_t *) data = cpu_to_le32(*(uint32_t *) (void *) &value);
+}
+
+/*****************************************************************************/
+
+void ecrt_write_lreal(void *data, double value)
+{
+    *(uint64_t *) data = cpu_to_le64(*(uint64_t *) (void *) &value);
 }
 
 /*****************************************************************************/

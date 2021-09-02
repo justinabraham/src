@@ -269,12 +269,6 @@ int ec_domain_finish(
         // Correct logical FMMU address
         fmmu->logical_start_address += base_address;
 
-        // Increment Input/Output counter to determine datagram types
-        // and calculate expected working counters
-        if (shall_count(fmmu, datagram_first_fmmu)) {
-            datagram_used[fmmu->dir]++;
-        }
-
         // If the current FMMU's data do not fit in the current datagram,
         // allocate a new one.
         if (datagram_size + fmmu->data_size > EC_MAX_DATA_SIZE) {
@@ -291,6 +285,12 @@ int ec_domain_finish(
             datagram_used[EC_DIR_OUTPUT] = 0;
             datagram_used[EC_DIR_INPUT] = 0;
             datagram_first_fmmu = fmmu;
+        }
+
+        // Increment Input/Output counter to determine datagram types
+        // and calculate expected working counters
+        if (shall_count(fmmu, datagram_first_fmmu)) {
+            datagram_used[fmmu->dir]++;
         }
 
         datagram_size += fmmu->data_size;
@@ -466,7 +466,10 @@ void ecrt_domain_process(ec_domain_t *domain)
             ec_fmmu_config_t, list);
     unsigned int redundancy;
 #endif
-    unsigned int dev_idx, wc_change;
+    unsigned int dev_idx;
+#ifdef EC_RT_SYSLOG
+    unsigned int wc_change;
+#endif
 
 #if DEBUG_REDUNDANCY
     EC_MASTER_DBG(domain->master, 1, "domain %u process\n", domain->index);
@@ -569,6 +572,7 @@ void ecrt_domain_process(ec_domain_t *domain)
 
     redundancy = redundant_wc > 0;
     if (redundancy != domain->redundancy_active) {
+#ifdef EC_RT_SYSLOG
         if (redundancy) {
             EC_MASTER_WARN(domain->master,
                     "Domain %u: Redundant link in use!\n",
@@ -578,23 +582,29 @@ void ecrt_domain_process(ec_domain_t *domain)
                     "Domain %u: Redundant link unused again.\n",
                     domain->index);
         }
+#endif
         domain->redundancy_active = redundancy;
     }
 #else
     domain->redundancy_active = 0;
 #endif
 
+#ifdef EC_RT_SYSLOG
     wc_change = 0;
+#endif
     wc_total = 0;
     for (dev_idx = EC_DEVICE_MAIN;
             dev_idx < ec_master_num_devices(domain->master); dev_idx++) {
         if (wc_sum[dev_idx] != domain->working_counter[dev_idx]) {
+#ifdef EC_RT_SYSLOG
             wc_change = 1;
+#endif
             domain->working_counter[dev_idx] = wc_sum[dev_idx];
         }
         wc_total += wc_sum[dev_idx];
     }
 
+#ifdef EC_RT_SYSLOG
     if (wc_change) {
         domain->working_counter_changes++;
     }
@@ -614,22 +624,23 @@ void ecrt_domain_process(ec_domain_t *domain)
         }
 #if EC_MAX_NUM_DEVICES > 1
         if (ec_master_num_devices(domain->master) > 1) {
-            printk(" (");
+            printk(KERN_CONT " (");
             for (dev_idx = EC_DEVICE_MAIN;
                     dev_idx < ec_master_num_devices(domain->master);
                     dev_idx++) {
-                printk("%u", domain->working_counter[dev_idx]);
+                printk(KERN_CONT "%u", domain->working_counter[dev_idx]);
                 if (dev_idx + 1 < ec_master_num_devices(domain->master)) {
-                    printk("+");
+                    printk(KERN_CONT "+");
                 }
             }
-            printk(")");
+            printk(KERN_CONT ")");
         }
 #endif
-        printk(".\n");
+        printk(KERN_CONT ".\n");
 
         domain->working_counter_changes = 0;
     }
+#endif
 }
 
 /*****************************************************************************/

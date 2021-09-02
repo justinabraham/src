@@ -30,7 +30,7 @@
 #  vim: syntax=automake
 #
 #------------------------------------------------------------------------------
-AUTOMAKE_OPTIONS = subdir-objects
+
 EXTRA_DIST =
 
 bin_PROGRAMS = ethercat
@@ -39,6 +39,7 @@ ethercat_SOURCES = \
 	../master/soe_errors.c \
 	Command.cpp \
 	CommandAlias.cpp \
+	CommandCrc.cpp \
 	CommandCStruct.cpp \
 	CommandConfig.cpp \
 	CommandData.cpp \
@@ -81,6 +82,7 @@ endif
 noinst_HEADERS = \
 	Command.h \
 	CommandAlias.h \
+	CommandCrc.h \
 	CommandCStruct.h \
 	CommandConfig.h \
 	CommandData.h \
@@ -122,7 +124,7 @@ endif
 REV = `if test -s $(top_srcdir)/revision; then \
 		cat $(top_srcdir)/revision; \
 	else \
-		hg id -i $(top_srcdir) 2>/dev/null || echo "unknown"; \
+		git -C $(top_srcdir) describe 2>/dev/null || echo "unknown"; \
 	fi`
 
 ethercat_CXXFLAGS = \

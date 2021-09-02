@@ -629,6 +629,8 @@ void ecdev_close(ec_device_t *device /**< EtherCAT device */)
  * Forwards the received data to the master. The master will analyze the frame
  * and dispatch the received commands to the sending instances.
  *
+ * The data have to begin with the Ethernet header (target MAC address).
+ *
  * \ingroup DeviceInterface
  */
 void ecdev_receive(
@@ -663,7 +665,7 @@ void ecdev_receive(
     ec_device_debug_ring_append(device, RX, ec_data, ec_size);
 #endif
 
-    ec_master_receive_datagrams(device->master, ec_data, ec_size);
+    ec_master_receive_datagrams(device->master, device, ec_data, ec_size);
 }
 
 /*****************************************************************************/

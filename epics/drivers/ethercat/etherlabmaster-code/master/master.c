@@ -1,8 +1,6 @@
 /******************************************************************************
  *
- *  $Id$
- *
- *  Copyright (C) 2006-2012  Florian Pose, Ingenieurgemeinschaft IgH
+ *  Copyright (C) 2006-2020  Florian Pose, Ingenieurgemeinschaft IgH
  *
  *  This file is part of the IgH EtherCAT Master.
  *
@@ -44,16 +42,21 @@
 #include <linux/device.h>
 #include <linux/version.h>
 #include <linux/hrtimer.h>
-#include <linux/sched/signal.h>
-#include <uapi/linux/sched/types.h>
+
 #include "globals.h"
 #include "slave.h"
 #include "slave_config.h"
 #include "device.h"
 #include "datagram.h"
+
 #ifdef EC_EOE
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#include <uapi/linux/sched/types.h> // struct sched_param
+#include <linux/sched/types.h> // sched_setscheduler
+#endif
 #include "ethernet.h"
 #endif
+
 #include "master.h"
 
 /*****************************************************************************/
@@ -61,6 +64,13 @@
 /** Set to 1 to enable external datagram injection debugging.
  */
 #define DEBUG_INJECT 0
+
+/** Always output corrupted frames.
+ */
+#define FORCE_OUTPUT_CORRUPTED 0
+
+/** SDO injection timeout in microseconds. */
+#define EC_SDO_INJECTION_TIMEOUT 10000
 
 #ifdef EC_HAVE_CYCLES
 
@@ -177,8 +187,7 @@ int ec_master_init(ec_master_t *master, /**< EtherCAT master */
     INIT_LIST_HEAD(&master->domains);
 
     master->app_time = 0ULL;
-    master->app_start_time = 0ULL;
-    master->has_app_time = 0;
+    master->dc_ref_time = 0ULL;
 
     master->scan_busy = 0;
     master->allow_scan = 1;
@@ -234,6 +243,7 @@ int ec_master_init(ec_master_t *master, /**< EtherCAT master */
     master->app_cb_data = NULL;
 
     INIT_LIST_HEAD(&master->sii_requests);
+    INIT_LIST_HEAD(&master->emerg_reg_requests);
 
     init_waitqueue_head(&master->request_queue);
 
@@ -849,9 +859,13 @@ void ec_master_inject_external_datagrams(
                     > ext_injection_timeout_jiffies)
 #endif
             {
+#if defined EC_RT_SYSLOG || DEBUG_INJECT
                 unsigned int time_us;
+#endif
 
                 datagram->state = EC_DATAGRAM_ERROR;
+
+#if defined EC_RT_SYSLOG || DEBUG_INJECT
 #ifdef EC_HAVE_CYCLES
                 time_us = (unsigned int)
                     ((cycles_now - datagram->cycles_sent) * 1000LL)
@@ -864,6 +878,7 @@ void ec_master_inject_external_datagrams(
                         " external datagram %s size=%zu,"
                         " max_queue_size=%zu\n", time_us, datagram->name,
                         datagram->data_size, master->max_queue_size);
+#endif
             }
             else {
 #if DEBUG_INJECT
@@ -941,8 +956,10 @@ void ec_master_queue_datagram(
     list_for_each_entry(queued_datagram, &master->datagram_queue, queue) {
         if (queued_datagram == datagram) {
             datagram->skip_count++;
+#ifdef EC_RT_SYSLOG
             EC_MASTER_DBG(master, 1,
                     "Datagram %p already queued (skipping).\n", datagram);
+#endif
             datagram->state = EC_DATAGRAM_QUEUED;
             return;
         }
@@ -1108,10 +1125,12 @@ void ec_master_send_datagrams(
  *
  * \return 0 in case of success, else < 0
  */
-void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
-                                 const uint8_t *frame_data, /**< frame data */
-                                 size_t size /**< size of the received data */
-                                 )
+void ec_master_receive_datagrams(
+        ec_master_t *master, /**< EtherCAT master */
+        ec_device_t *device, /**< EtherCAT device */
+        const uint8_t *frame_data, /**< frame data */
+        size_t size /**< size of the received data */
+        )
 {
     size_t frame_size, data_size;
     uint8_t datagram_type, datagram_index;
@@ -1120,14 +1139,16 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
     ec_datagram_t *datagram;
 
     if (unlikely(size < EC_FRAME_HEADER_SIZE)) {
-        if (master->debug_level) {
+        if (master->debug_level || FORCE_OUTPUT_CORRUPTED) {
             EC_MASTER_DBG(master, 0, "Corrupted frame received"
-                    " (size %zu < %u byte):\n",
-                    size, EC_FRAME_HEADER_SIZE);
+                    " on %s (size %zu < %u byte):\n",
+                    device->dev->name, size, EC_FRAME_HEADER_SIZE);
             ec_print_data(frame_data, size);
         }
         master->stats.corrupted++;
+#ifdef EC_RT_SYSLOG
         ec_master_output_stats(master);
+#endif
         return;
     }
 
@@ -1138,14 +1159,17 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
     cur_data += EC_FRAME_HEADER_SIZE;
 
     if (unlikely(frame_size > size)) {
-        if (master->debug_level) {
+        if (master->debug_level || FORCE_OUTPUT_CORRUPTED) {
             EC_MASTER_DBG(master, 0, "Corrupted frame received"
-                    " (invalid frame size %zu for "
-                    "received size %zu):\n", frame_size, size);
+                    " on %s (invalid frame size %zu for "
+                    "received size %zu):\n", device->dev->name,
+                    frame_size, size);
             ec_print_data(frame_data, size);
         }
         master->stats.corrupted++;
+#ifdef EC_RT_SYSLOG
         ec_master_output_stats(master);
+#endif
         return;
     }
 
@@ -1160,13 +1184,16 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
 
         if (unlikely(cur_data - frame_data
                      + data_size + EC_DATAGRAM_FOOTER_SIZE > size)) {
-            if (master->debug_level) {
+            if (master->debug_level || FORCE_OUTPUT_CORRUPTED) {
                 EC_MASTER_DBG(master, 0, "Corrupted frame received"
-                        " (invalid data size %zu):\n", data_size);
+                        " on %s (invalid data size %zu):\n",
+                        device->dev->name, data_size);
                 ec_print_data(frame_data, size);
             }
             master->stats.corrupted++;
+#ifdef EC_RT_SYSLOG
             ec_master_output_stats(master);
+#endif
             return;
         }
 
@@ -1185,7 +1212,9 @@ void ec_master_receive_datagrams(ec_master_t *master, /**< EtherCAT master */
         // no matching datagram was found
         if (!matched) {
             master->stats.unmatched++;
+#ifdef EC_RT_SYSLOG
             ec_master_output_stats(master);
+#endif
 
             if (unlikely(master->debug_level > 0)) {
                 EC_MASTER_DBG(master, 0, "UNMATCHED datagram:\n");
@@ -1283,9 +1312,13 @@ void ec_master_clear_device_stats(
 
     for (i = 0; i < EC_RATE_COUNT; i++) {
         master->device_stats.tx_frame_rates[i] = 0;
+        master->device_stats.rx_frame_rates[i] = 0;
         master->device_stats.tx_byte_rates[i] = 0;
+        master->device_stats.rx_byte_rates[i] = 0;
         master->device_stats.loss_rates[i] = 0;
     }
+
+    master->device_stats.jiffies = 0;
 }
 
 /*****************************************************************************/
@@ -1632,12 +1665,25 @@ static int ec_master_operation_thread(void *priv_data)
 /*****************************************************************************/
 
 #ifdef EC_EOE
+
+/* compatibility for priority changes */
+static inline void set_normal_priority(struct task_struct *p, int nice)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 0)
+    sched_set_normal(p, nice);
+#else
+    struct sched_param param = { .sched_priority = 0 };
+    sched_setscheduler(p, SCHED_NORMAL, &param);
+    set_user_nice(p, nice);
+#endif
+}
+
+/*****************************************************************************/
+
 /** Starts Ethernet over EtherCAT processing on demand.
  */
 void ec_master_eoe_start(ec_master_t *master /**< EtherCAT master */)
 {
-    struct sched_param param = { .sched_priority = 0 };
-
     if (master->eoe_thread) {
         EC_MASTER_WARN(master, "EoE already running!\n");
         return;
@@ -1663,8 +1709,7 @@ void ec_master_eoe_start(ec_master_t *master /**< EtherCAT master */)
         return;
     }
 
-    sched_setscheduler(master->eoe_thread, SCHED_NORMAL, &param);
-    set_user_nice(master->eoe_thread, 0);
+    set_normal_priority(master->eoe_thread, 0);
 }
 
 /*****************************************************************************/
@@ -1744,6 +1789,7 @@ schedule:
     EC_MASTER_DBG(master, 1, "EoE thread exiting...\n");
     return 0;
 }
+
 #endif
 
 /*****************************************************************************/
@@ -2386,8 +2432,7 @@ void ecrt_master_deactivate(ec_master_t *master)
 #endif
 
     master->app_time = 0ULL;
-    master->app_start_time = 0ULL;
-    master->has_app_time = 0;
+    master->dc_ref_time = 0ULL;
 
 #ifdef EC_EOE
     if (eoe_was_running) {
@@ -2478,6 +2523,8 @@ void ecrt_master_receive(ec_master_t *master)
             list_del_init(&datagram->queue);
             datagram->state = EC_DATAGRAM_TIMED_OUT;
             master->stats.timeouts++;
+
+#ifdef EC_RT_SYSLOG
             ec_master_output_stats(master);
 
             if (unlikely(master->debug_level > 0)) {
@@ -2495,6 +2542,7 @@ void ecrt_master_receive(ec_master_t *master)
                         " index %02X waited %u us.\n",
                         datagram, datagram->index, time_us);
             }
+#endif /* RT_SYSLOG */
         }
     }
 }
@@ -2626,12 +2674,18 @@ int ecrt_master_get_slave(ec_master_t *master, uint16_t slave_position,
 {
     const ec_slave_t *slave;
     unsigned int i;
+    int ret = 0;
 
     if (down_interruptible(&master->master_sem)) {
         return -EINTR;
     }
 
     slave = ec_master_find_slave_const(master, 0, slave_position);
+
+    if (slave == NULL) {
+       ret = -ENOENT;
+       goto out_get_slave;
+    }
 
     slave_info->position = slave->ring_position;
     slave_info->vendor_id = slave->sii.vendor_id;
@@ -2669,9 +2723,10 @@ int ecrt_master_get_slave(ec_master_t *master, uint16_t slave_position,
         slave_info->name[0] = 0;
     }
 
+out_get_slave:
     up(&master->master_sem);
 
-    return 0;
+    return ret;
 }
 
 /*****************************************************************************/
@@ -2733,9 +2788,8 @@ void ecrt_master_application_time(ec_master_t *master, uint64_t app_time)
 {
     master->app_time = app_time;
 
-    if (unlikely(!master->has_app_time)) {
-        master->app_start_time = app_time;
-        master->has_app_time = 1;
+    if (unlikely(!master->dc_ref_time)) {
+        master->dc_ref_time = app_time;
     }
 }
 
@@ -2764,6 +2818,19 @@ void ecrt_master_sync_reference_clock(ec_master_t *master)
 {
     if (master->dc_ref_clock) {
         EC_WRITE_U32(master->ref_sync_datagram.data, master->app_time);
+        ec_master_queue_datagram(master, &master->ref_sync_datagram);
+    }
+}
+
+/*****************************************************************************/
+
+void ecrt_master_sync_reference_clock_to(
+        ec_master_t *master,
+        uint64_t sync_time
+        )
+{
+    if (master->dc_ref_clock) {
+        EC_WRITE_U32(master->ref_sync_datagram.data, sync_time);
         ec_master_queue_datagram(master, &master->ref_sync_datagram);
     }
 }
@@ -3036,7 +3103,7 @@ int ecrt_master_sdo_upload(ec_master_t *master, uint16_t slave_position,
         }
     } else {
         if (request.data_size > target_size) {
-            EC_MASTER_ERR(master, "Buffer too small.\n");
+            EC_SLAVE_ERR(slave, "%s(): Buffer too small.\n", __func__);
             ret = -EOVERFLOW;
         }
         else {
@@ -3194,7 +3261,7 @@ int ecrt_master_read_idn(ec_master_t *master, uint16_t slave_position,
         ret = -EIO;
     } else { // success
         if (request.data_size > target_size) {
-            EC_MASTER_ERR(master, "Buffer too small.\n");
+            EC_SLAVE_ERR(slave, "%s(): Buffer too small.\n", __func__);
             ret = -EOVERFLOW;
         }
         else { // data fits in buffer
@@ -3242,6 +3309,7 @@ EXPORT_SYMBOL(ecrt_master_state);
 EXPORT_SYMBOL(ecrt_master_link_state);
 EXPORT_SYMBOL(ecrt_master_application_time);
 EXPORT_SYMBOL(ecrt_master_sync_reference_clock);
+EXPORT_SYMBOL(ecrt_master_sync_reference_clock_to);
 EXPORT_SYMBOL(ecrt_master_sync_slave_clocks);
 EXPORT_SYMBOL(ecrt_master_reference_clock_time);
 EXPORT_SYMBOL(ecrt_master_sync_monitor_queue);

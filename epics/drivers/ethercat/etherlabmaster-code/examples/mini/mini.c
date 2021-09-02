@@ -307,12 +307,10 @@ void read_voe(void)
 
 /*****************************************************************************/
 
-//
-
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0))
-	void cyclic_task(unsigned long data)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+void cyclic_task(struct timer_list *t)
 #else
-	void cyclic_task(struct timer_list *t)
+void cyclic_task(unsigned long data)
 #endif
 {
     // receive process data
@@ -498,11 +496,11 @@ int __init init_mini_module(void)
 #endif
 
     printk(KERN_INFO PFX "Starting cyclic sample thread.\n");
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0))
-	init_timer(&timer);
-	timer.function = cyclic_task;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0)
+    timer_setup(&timer, cyclic_task, 0);
 #else
-	timer_setup(&timer, cyclic_task, 0);
+    init_timer(&timer);
+    timer.function = cyclic_task;
 #endif
     timer.expires = jiffies + 10;
     add_timer(&timer);

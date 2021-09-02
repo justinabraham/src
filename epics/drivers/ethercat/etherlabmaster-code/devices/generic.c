@@ -149,7 +149,12 @@ int ec_gen_device_init(
     dev->socket = NULL;
     dev->rx_buf = NULL;
 
-    dev->netdev = alloc_netdev(sizeof(ec_gen_device_t *), &null, NET_NAME_UNKNOWN, ether_setup);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0)
+    dev->netdev = alloc_netdev(sizeof(ec_gen_device_t *), &null,
+            NET_NAME_UNKNOWN, ether_setup);
+#else
+    dev->netdev = alloc_netdev(sizeof(ec_gen_device_t *), &null, ether_setup);
+#endif
     if (!dev->netdev) {
         return -ENOMEM;
     }
@@ -201,30 +206,19 @@ int ec_gen_device_create_socket(
 {
     int ret;
     struct sockaddr_ll sa;
-	
-	#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0))
-		struct net *nd_net;
-	#endif
-	
 
     dev->rx_buf = kmalloc(EC_GEN_RX_BUF_SIZE, GFP_KERNEL);
     if (!dev->rx_buf) {
         return -ENOMEM;
     }
 
-	#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 2, 0))
-		ret = sock_create_kern(&init_net, PF_PACKET, SOCK_RAW, htons(ETH_P_ETHERCAT), &dev->socket);
-	#else
-		nd_net = dev_net(dev->netdev);
-		
-		if (!nd_net) {
-			printk(KERN_ERR PFX "Failed to obtain net namespace\n");
-			return -EINVAL;
-		}
-		
-		ret = sock_create_kern(nd_net, PF_PACKET, SOCK_RAW, htons(ETH_P_ETHERCAT), &dev->socket);
-	#endif
-	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+    ret = sock_create_kern(&init_net, PF_PACKET, SOCK_RAW,
+            htons(ETH_P_ETHERCAT), &dev->socket);
+#else
+    ret = sock_create_kern(PF_PACKET, SOCK_RAW, htons(ETH_P_ETHERCAT),
+            &dev->socket);
+#endif
     if (ret) {
         printk(KERN_ERR PFX "Failed to create socket (ret = %i).\n", ret);
         return ret;
