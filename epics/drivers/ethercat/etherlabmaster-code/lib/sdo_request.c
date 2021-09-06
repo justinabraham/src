@@ -39,6 +39,7 @@
 #include "sdo_request.h"
 #include "slave_config.h"
 #include "master.h"
+#include "liberror.h"
 
 /*****************************************************************************/
 
@@ -67,7 +68,8 @@ void ecrt_sdo_request_index(ec_sdo_request_t *req, uint16_t index,
 
     ret = ioctl(req->config->master->fd, EC_IOCTL_SDO_REQUEST_INDEX, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        fprintf(stderr, "Failed to set SDO request index/subindex: %s\n",
+        ecrt_errcode = ECRT_ERRSDOREQUESTINDEX;
+        ERRPRINTF("Failed to set SDO request index/subindex: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -85,7 +87,8 @@ void ecrt_sdo_request_timeout(ec_sdo_request_t *req, uint32_t timeout)
 
     ret = ioctl(req->config->master->fd, EC_IOCTL_SDO_REQUEST_TIMEOUT, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        fprintf(stderr, "Failed to set SDO request timeout: %s\n",
+        ecrt_errcode = ECRT_ERRSDOREQUESTTIMEOUT;
+        ERRPRINTF("Failed to set SDO request timeout: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -116,14 +119,16 @@ ec_request_state_t ecrt_sdo_request_state(ec_sdo_request_t *req)
 
     ret = ioctl(req->config->master->fd, EC_IOCTL_SDO_REQUEST_STATE, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        fprintf(stderr, "Failed to get SDO request state: %s\n",
+        ecrt_errcode = ECRT_ERRSDOREQUESTSTATE;
+        ERRPRINTF("Failed to get SDO request state: %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
         return EC_REQUEST_ERROR;
     }
 
     if (data.size) { // new data waiting to be copied
         if (req->mem_size < data.size) {
-            fprintf(stderr, "Received %zu bytes do not fit info SDO data"
+            ecrt_errcode = ECRT_ERRSDOREQUESTSTATE1;
+            ERRPRINTF("Received %zu bytes do not fit info SDO data"
                     " memory (%zu bytes)!\n", data.size, req->mem_size);
             return EC_REQUEST_ERROR;
         }
@@ -133,7 +138,8 @@ ec_request_state_t ecrt_sdo_request_state(ec_sdo_request_t *req)
         ret = ioctl(req->config->master->fd,
                 EC_IOCTL_SDO_REQUEST_DATA, &data);
         if (EC_IOCTL_IS_ERROR(ret)) {
-            fprintf(stderr, "Failed to get SDO data: %s\n",
+            ecrt_errcode = ECRT_ERRSDOREQUESTSTATE2;
+            ERRPRINTF("Failed to get SDO data: %s\n",
                     strerror(EC_IOCTL_ERRNO(ret)));
             return EC_REQUEST_ERROR;
         }
@@ -155,7 +161,8 @@ void ecrt_sdo_request_read(ec_sdo_request_t *req)
 
     ret = ioctl(req->config->master->fd, EC_IOCTL_SDO_REQUEST_READ, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        fprintf(stderr, "Failed to command an SDO read operation : %s\n",
+        ecrt_errcode = ECRT_ERRSDOREQUESTREAD;
+        ERRPRINTF("Failed to command an SDO read operation : %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }
@@ -174,7 +181,8 @@ void ecrt_sdo_request_write(ec_sdo_request_t *req)
 
     ret = ioctl(req->config->master->fd, EC_IOCTL_SDO_REQUEST_WRITE, &data);
     if (EC_IOCTL_IS_ERROR(ret)) {
-        fprintf(stderr, "Failed to command an SDO write operation : %s\n",
+        ecrt_errcode = ECRT_ERRSDOREQUESTWRITE;
+        ERRPRINTF("Failed to command an SDO write operation : %s\n",
                 strerror(EC_IOCTL_ERRNO(ret)));
     }
 }

@@ -33,6 +33,7 @@ lib_LTLIBRARIES = libethercat.la
 #------------------------------------------------------------------------------
 
 libethercat_la_SOURCES = \
+    liberror.c \
 	common.c \
 	domain.c \
 	master.c \
@@ -42,6 +43,7 @@ libethercat_la_SOURCES = \
 	voe_handler.c
 
 noinst_HEADERS = \
+	liberror.h \
 	domain.h \
 	ioctl.h \
 	master.h \
