@@ -1,7 +1,7 @@
 #define ERRSTRING_LEN 250
 
 extern int ecrt_err_to_stderr;
-extern char ecrt_errstring[ERRSTRING_LEN];
+extern char *ecrt_errstring[ERRSTRING_LEN];
 
 #define ERRPRINTF(...) do { \
     if (ecrt_err_to_stderr) { \

@@ -1,0 +1,20 @@
+Patch to stop errors in stderr
+The patch for the etherlab library: configurable-error-suppression.patch
+##
+/lib/Makefile.am
+/lib/common.c
+/lib/domain.c
+[null] /lib/liberror-documentation.txt
+[null] /lib/liberror.c
+[null] /lib/liberror.h
+/lib/master.c
+/lib/reg_request.c
+/lib/sdo_request.c
+/lib/slave_config.c
+/lib/voe_handler.c
+
+
+Patch to avoid syslog spamming
+A further patch thanks to the etherlab mailing list: avoid-syslog-spam-when-bus-loses-power.patch
+##
+master/ioctl.c
